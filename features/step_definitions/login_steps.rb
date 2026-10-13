@@ -15,6 +15,10 @@ When('eu preencho o campo {string} com {string}') do |nome_do_campo, valor|
   fill_in nome_do_campo, with: valor
 end
 
+When('eu deixo o campo {string} vazio') do |nome_do_campo|
+  fill_in nome_do_campo, with: ""
+end
+
 When('eu clico no botão {string}') do |texto_botao|
   click_button texto_botao
 end
