@@ -25,6 +25,9 @@ Feature: Extrato de Recargas e Histórico de Refeições
 	    Given que eu sou um estudante recém-cadastrado sem histórico
 	    When eu clico no botão "Extrato de Refeições" no topo da página
     	Then eu devo ser redirecionado para a página "/extrato"
-	    Then eu devo ver a mensagem "Você ainda não possui transações registradas."
-	    And o card "Saldo atual" deve mostrar "R$ 0,00"
+	    Then eu devo ver um card com o total gasto no mês vazio
+    	And eu devo ver um card com o total de refeições realizadas vazio
+    	And eu devo ver um card com o total recarregado vazio
+	    And eu devo ver uma tabela contendo os cabeçalhos "Data e Hora", "Refeição/Evento", "Restaurante", "Método de Acesso", "Valor" e "Comprovante"
+    	And a tabela deve estar vazia
 
