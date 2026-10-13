@@ -42,10 +42,7 @@ end
 # Testes específicos do sad path
 
 Then(/^eu devo ver um card com o (.*) vazio$/) do |nome_do_card|
-  # Encontra o card pelo título capturado (ex: "total gasto no mês")
   within('.card', text: /#{nome_do_card}/i) do
-    # Verifica se o conteúdo reflete um estado vazio/zerado. 
-    # Adapte as strings abaixo (como "R$ 0,00" ou "0") para combinar com o que você vai renderizar no seu HAML.
     texto = page.text
     expect(texto).to match(/R\$ 0,00|0\b/i)
   end
