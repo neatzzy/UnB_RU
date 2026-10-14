@@ -1,6 +1,4 @@
 Feature: Login de Usuário
-
-Feature: Autenticação de Usuário
   Como um estudante
   Eu quero fazer login no sistema do Restaurante Universitário
   Para acessar meu extrato e outras áreas restritas
