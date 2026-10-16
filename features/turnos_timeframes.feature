@@ -13,7 +13,7 @@
 
   Scenario: Editar o horário de um turno
     Given que eu acesso a página de turnos e time-frames
-    When eu clico no botão "Editar Horários" do turno "Almoço"
+    When eu clico no botão "Editar Horários do Almoço"
     And eu preencho o campo "Início" com "11:00"
     And eu preencho o campo "Fim" com "14:00"
     And eu clico no botão "Salvar"
@@ -22,7 +22,7 @@
 
   Scenario Outline: Editar turno com horário inválido
     Given que eu acesso a página de turnos e time-frames
-    When eu clico no botão "Editar Horários" do turno "Almoço"
+    When eu clico no botão "Editar Horários do Almoço"
     And eu preencho o campo "Início" com "<inicio>"
     And eu preencho o campo "Fim" com "<fim>"
     And eu clico no botão "Salvar"
@@ -37,9 +37,9 @@
 
   Scenario: Dividir um turno em time-frames de FastPass
     Given que eu acesso a página de turnos e time-frames
-    When eu clico no botão "Configurar FastPass" do turno "Almoço"
-    And eu preencho o campo "Granularidade da Janela (min)" com "15"
-    And eu preencho o campo "Tolerância de Atraso (min)" com "3"
+    When eu seleciono "Almoço" no campo "Turno de Referência"
+    And eu preencho o campo "Granularidade da Janela" com "15"
+    And eu preencho o campo "Tolerância de Atraso" com "3"
     And eu clico no botão "Salvar Configuração"
     Then eu devo ver a mensagem "Time-frames gerados com sucesso"
     And o turno "Almoço" deve possuir 12 time-frames
@@ -48,9 +48,9 @@
 
   Scenario Outline: Configurar time-frames com granularidade inválida
     Given que eu acesso a página de turnos e time-frames
-    When eu clico no botão "Configurar FastPass" do turno "Almoço"
-    And eu preencho o campo "Granularidade da Janela (min)" com "<granularidade>"
-    And eu preencho o campo "Tolerância de Atraso (min)" com "3"
+    When eu seleciono "Almoço" no campo "Turno de Referência"
+    And eu preencho o campo "Granularidade da Janela" com "<granularidade>"
+    And eu preencho o campo "Tolerância de Atraso" com "3"
     And eu clico no botão "Salvar Configuração"
     Then eu devo ver a mensagem "<mensagem>"
     And o turno "Almoço" deve possuir 0 time-frames

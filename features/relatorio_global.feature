@@ -64,7 +64,7 @@ Feature: Relatório Global de Acessos
 
   Scenario: Exportar o relatório em PDF
     Given que eu acesso a página do relatório global
-    When eu clico no botão "Exportar PDF"
+    When eu clico no botão "Exportar PDF Oficial"
     Then eu devo receber um arquivo PDF
 
   Scenario: Exportar PDF de um relatório sem acessos
@@ -72,7 +72,7 @@ Feature: Relatório Global de Acessos
     When eu preencho o campo "Data Inicial" com "01/10/2026"
     And eu preencho o campo "Data Final" com "02/10/2026"
     And eu clico no botão "Filtrar"
-    And eu clico no botão "Exportar PDF"
+    And eu clico no botão "Exportar PDF Oficial"
     Then eu devo ver a mensagem "Não há acessos para exportar no período selecionado"
 
   Scenario: Estudante tenta acessar o relatório global

@@ -12,30 +12,24 @@ When('eu tento acessar a página de turnos e time-frames') do
   visit '/admin/turnos'
 end
 
-When('eu clico no botão {string} do turno {string}') do |texto_botao, turno|
-  within('.turno', text: turno) do
-    click_button texto_botao
-  end
-end
-
 Then('o turno {string} deve exibir o horário {string}') do |turno, horario|
   expect(page).to have_css('.turno', text: /#{turno}.*#{horario}/m)
 end
 
 Then('o turno {string} deve possuir {int} time-frames') do |turno, quantidade|
-  within('.turno', text: turno) do
+  within('.janelas-fastpass', text: turno) do
     expect(page).to have_css('.time-frame', count: quantidade)
   end
 end
 
 Then('o primeiro time-frame do turno {string} deve ser {string}') do |turno, horario|
-  within('.turno', text: turno) do
+  within('.janelas-fastpass', text: turno) do
     expect(all('.time-frame').first).to have_content(horario)
   end
 end
 
 Then('o último time-frame do turno {string} deve ser {string}') do |turno, horario|
-  within('.turno', text: turno) do
+  within('.janelas-fastpass', text: turno) do
     expect(all('.time-frame').last).to have_content(horario)
   end
 end
