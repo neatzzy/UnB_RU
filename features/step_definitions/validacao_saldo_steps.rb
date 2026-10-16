@@ -2,11 +2,11 @@ Given('que um funcionário está na página de Validação') do
   visit validacao_path # substituir pela rota real, uma vez que ela for criada
 end
 
-Then('ele deve ver um painel intitulado {string}') |titulo_catraca| do
+Then('ele deve ver um painel intitulado {string}') do |titulo_catraca|
   expect(page).to have_content(titulo_catraca)
 end
 
-Then ('uma sessão intitulada {string}') |titulo_leitura| do
+Then ('uma sessão intitulada {string}') do |titulo_leitura|
   expect(page).to have_content(titulo_leitura)
 end
 
@@ -33,7 +33,7 @@ And('o funcionário tenta validar o QR Code do estudante') do
   click_button 'Validar'
 end
 
-Then('o acesso da catraca para o restaurante deve ser {string} para a próxima passagem')|status| do
+Then('o acesso da catraca para o restaurante deve ser {string} para a próxima passagem') do |status|
   expect(page).to have_css('.status_catraca', text: /#{status}/i)
 end
 
