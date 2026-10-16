@@ -1,13 +1,16 @@
 # Steps da issue #5 - Configuração de Ponto de Acesso
 
+# O funcionário é um User com perfil próprio, e não um model separado: a tela de
+# cadastro usa um único campo "Matrícula SIGAA ou SIAPE" para estudante e servidor.
 Given('que eu estou logado como funcionário do restaurante') do
-  @funcionario = Funcionario.create!(
+  @funcionario = User.create!(
     nome: 'Funcionário Teste',
-    siape: '4598210',
-    password: 'senha123'
+    matricula: '4598210',
+    password: 'senha123',
+    perfil: 'funcionario'
   )
   visit '/login'
-  fill_in 'Matrícula', with: @funcionario.siape
+  fill_in 'Matrícula', with: @funcionario.matricula
   fill_in 'Senha', with: 'senha123'
   click_button 'Entrar'
 end
