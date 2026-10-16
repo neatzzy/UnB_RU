@@ -1,8 +1,8 @@
 Given('que um funcionário está logado no aplicativo') do
   @funcionario = Employee.create!(
-    nome: 'Teste Funcionário'
-    matricula_func: '123456'
-    password: 'senha456'
+    nome: 'Teste Funcionário',
+    matricula_func: '123456',
+    password: 'senha456',
     catraca_atual: nil
   )
   login_as(@funcionario, scope: :employee)
@@ -37,8 +37,8 @@ When('a catraca que ele está gerindo tem o seguinte histórico:') do |table|
       catraca: @catraca,
       data_hora: Time.zone.parse(linha['data_hora']),
       matricula_disc: linha['matricula_disc'],
-      modo_validacao: linha['modo_validacao']
-      tarifa: linha['tarifa'].to_f
+      modo_validacao: linha['modo_validacao'],
+      tarifa: linha['tarifa'].to_f,
       status: linha['status_catraca']
     )
   end

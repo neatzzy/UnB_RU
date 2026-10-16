@@ -1,7 +1,7 @@
 Given('que um funcionário está logado no aplicativo') do
   @funcionario = Employee.create!(
-    nome: 'Teste Funcionário'
-    matricula_func: '123456'
+    nome: 'Teste Funcionário',
+    matricula_func: '123456',
     password: 'senha456'
   )
   login_as(@funcionario, scope: :employee)
