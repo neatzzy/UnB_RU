@@ -1,4 +1,13 @@
-Given('que um funcionário está na página de Validação') do
+Given('que um funcionário está logado no aplicativo') do
+  @funcionario = Employee.create!(
+    nome: 'Teste Funcionário'
+    matricula_func: '123456'
+    password: 'senha456'
+  )
+  login_as(@funcionario, scope: :employee)
+end
+
+Given('ele está na página de "Validação"') do
   visit validacao_path # substituir pela rota real, uma vez que ela for criada
 end
 

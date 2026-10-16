@@ -4,7 +4,8 @@ Feature: O usuário pode ver o cardápio e as diferentes opções da refeição 
   Eu quero poder ver cardápio das refeições que estão sendo servidas, com todas as opções (padrão, ovolactovegetariano e vegetariano estrito).
 
   Background:
-    Given que o estudante está na página inicial
+    Given que o estudante está logado no aplicativo
+    And ele está na página inicial
     Then ele deve ver uma seção intitulada "Cardápio"
     And ele deve ver um botão intitulado "Atualizar Cardápio"
 
