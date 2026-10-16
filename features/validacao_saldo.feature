@@ -5,14 +5,16 @@ Feature: Catraca verifica o saldo do estudante antes de deixá-lo entrar
 
   Background: 
     Given que um funcionário está na página de "Validação"
-    Then ele deve ver um painel referente à catraca que ele está gerindo
+    Then ele deve ver um painel intitulado "Catraca Atual"
     And uma seção intitulada "Leitura do QR code"
 
   Scenario: QR code analisado tem saldo insuficiente (sad path)
     When o QR code analisado está associado a uma conta com saldo insuficiente
-	Then o acesso da catraca para o restaurante deve continuar bloqueado
+    And o funcionário tenta validar o QR Code do estudante
+	  Then o acesso da catraca para o restaurante deve ser "Bloqueado" para a próxima passagem
   
   Scenario: Estudante tenta entrar com saldo suficiente (happy path)
     When o QR code analisado está associado a uma conta com saldo suficiente
-	Then o preço da refeição deve ser descontado do saldo da conta 
-	And o acesso da catraca para o restaurante deve ser permitido para a próxima passagem
+    And o funcionário tenta validar o QR Code do estudante
+    Then o preço da refeição deve ser descontado do saldo da conta do estudante
+	  And o acesso da catraca para o restaurante deve ser "Liberado" para a próxima passagem
