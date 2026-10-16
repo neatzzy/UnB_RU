@@ -2,6 +2,38 @@ Given('que eu estou na página inicial') do
   visit '/home'
 end
 
+Given('que eu estou logado como um estudante') do
+  @estudante = User.create!(
+    nome: 'Estudante', 
+    matricula: '190012345',
+    password: 'password123'
+  )
+  login_as(@estudante, scope: :user)
+end
+
+Given('que eu sou um estudante recém-cadastrado sem histórico') do
+  @estudante = User.create!(
+    nome: 'Calouro', 
+    matricula: '200054321',
+    password: 'password123'
+  )
+  login_as(@estudante, scope: :user)
+end
+
+Given('eu possuo o seguinte histórico de uso no Restaurante Universitário:') do |table|
+  table.hashes.each do |linha|
+    Transaction.create!(
+      user: @estudante,
+      data_hora: linha['data_hora'],
+      tipo: linha['tipo'],
+      restaurante: linha['restaurante'],
+      metodo: linha['metodo'],
+      valor: linha['valor'].to_f,
+      comprovante: linha['comprovante']
+    )
+  end
+end
+
 When('eu clico no botão {string} no topo da página') do |texto_botao|
   within('header') do
     click_on texto_botao
@@ -12,9 +44,8 @@ Then('eu devo ser redirecionado para a página {string}') do |caminho|
   expect(page).to have_current_path(caminho)
 end
 
-# Aqui eu uso uma regex para capturar o final da frase dos cards
-Then(/^eu devo ver um card com o (.*)$/) do |conteudo_card|
-  expect(page).to have_css('.card', text: /#{conteudo_card}/i) # Procura por uma div com a classe .card que contenha o texto de "conteudo_card"
+Then(/^eu devo ver um card com o (?!.* vazio$)(.*)$/) do |conteudo_card|
+  expect(page).to have_css('.card', text: /#{conteudo_card}/i)
 end
 
 Then('eu devo ver uma tabela contendo os cabeçalhos {string}, {string}, {string}, {string}, {string} e {string}') do |c1, c2, c3, c4, c5, c6|
@@ -38,8 +69,6 @@ Then('a tabela deve exibir a linha com {string}, {string}, {string}, {string}, {
     expect(linha).to have_content(comprovante)
   end
 end
-
-# Testes específicos do sad path
 
 Then(/^eu devo ver um card com o (.*) vazio$/) do |nome_do_card|
   within('.card', text: /#{nome_do_card}/i) do

@@ -1,8 +1,7 @@
-# Cria o usuário no banco de dados de teste antes de o cenário rodar.
-Given('que existe um estudante cadastrado com o e-mail {string} e senha {string}') do |email, senha|
+Given('que existe um estudante cadastrado com a matrícula {string} e senha {string}') do |matricula, senha|
   User.create!(
     nome: 'Estudante Teste',
-    email: email,
+    matricula: matricula, 
     password: senha
   )
 end
@@ -29,4 +28,8 @@ end
 
 Then('eu devo permanecer na página de login') do
   expect(page).to have_current_path(new_user_session_path)
+end
+
+Then('eu devo ver a mensagem {string}') do |mensagem|
+  expect(page).to have_content(mensagem)
 end
