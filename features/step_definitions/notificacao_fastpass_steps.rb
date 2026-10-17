@@ -13,7 +13,7 @@ Given('ele se inscreveu no FastPass para a próxima refeição') do
     opcao_padrao: 'Peixe ao molho branco gratinado.',
     opcao_ovolacto: 'Ovos assados ao sugo',
     opcao_veg_estrito: 'Refogado de grão de bico',
-    horario_inicio: Time.Zone.parse('12:00:00'),
+    horario_inicio: Time.zone.parse('12:00:00'),
   )
 
   @inscricao = Subscription.create!(
@@ -55,5 +55,6 @@ Then('um painel com o resultado \({string} ou {string})') do |msg_ganhou, msg_pe
 end
 
 After do
-  travel_back # Libera o tempo do sistema
+  # travel_back
+  # Libera o tempo do sistema
 end
