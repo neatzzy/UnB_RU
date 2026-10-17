@@ -1,4 +1,4 @@
-Given('que o estudante está logado no aplicativo') do
+Given('que o estudante está logado no aplicativo \(Teste FastPass\)') do
   @estudante = User.create!(
     nome: 'Estudante Com Muita Fome',
     matricula_disc: '261000004',
@@ -56,5 +56,5 @@ end
 
 After do
   # travel_back
-  # Libera o tempo do sistema
+  # Libera o tempo do sistema (adicionar TimeHelpers)
 end
