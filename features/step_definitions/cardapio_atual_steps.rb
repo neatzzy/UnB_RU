@@ -31,11 +31,11 @@ Then('ele deve ver um erro dizendo: {string}') do |mensagem_erro|
   expect(page).to have_content(mensagem_erro)
 end
 
-Then('ele deve ver qual refeição está sendo servida (café da manhã, almoço, jantar)') do
+Then('ele deve ver qual refeição está sendo servida \(café da manhã, almoço, jantar\)') do
   expect(page).to have_content (@refeicao.tipo)
 end
 
-Then('todas as opções da refeição (padrão, ovolactovegetariano e vegetariano estrito)') do
+Then('todas as opções da refeição \(padrão, ovolactovegetariano e vegetariano estrito\)') do
   expect(page).to have_content (@refeicao.opcao_padrao)
   expect(page).to have_content (@refeicao.opcao_ovolacto)
   expect(page).to have_content (@refeicao.opcao_veg_estrito)
