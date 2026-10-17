@@ -15,7 +15,7 @@ Then('ele deve ver um painel intitulado {string}') do |titulo_catraca|
   expect(page).to have_content(titulo_catraca)
 end
 
-Then ('uma sessão intitulada {string}') do |titulo_leitura|
+Then('uma sessão intitulada {string}') do |titulo_leitura|
   expect(page).to have_content(titulo_leitura)
 end
 
@@ -37,7 +37,7 @@ When('o QR code analisado está associado a uma conta com saldo suficiente') do
   )
 end
 
-And('o funcionário tenta validar o QR Code do estudante') do
+When('o funcionário tenta validar o QR Code do estudante') do
   fill_in 'QR Code', with: @estudante.qr_code
   click_button 'Validar'
 end
@@ -47,6 +47,7 @@ Then('o acesso da catraca para o restaurante deve ser {string} para a próxima p
 end
 
 Then('o preço da refeição deve ser descontado do saldo da conta do estudante') do
+  @estudante.reload
   preco_refeicao = 5.0
   expect(@estudante.saldo).to eq(20.0 - preco_refeicao)
 end
