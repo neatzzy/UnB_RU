@@ -13,7 +13,7 @@ Given('ele está na página de "Histórico Local"') do
 end
 
 When('o funcionário não está gerindo nenhuma catraca') do
-  @funcionario.update!(:catraca_atual: nil)
+  @funcionario.update!(catraca_atual: nil)
   visit current_path
 end
 
