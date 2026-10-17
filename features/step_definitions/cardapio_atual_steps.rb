@@ -1,4 +1,13 @@
-Given ('que o estudante está na página inicial') do
+Given('que o estudante está logado no aplicativo') do
+  @estudante = User.create!(
+    nome: 'Estudante Com Fome',
+    matricula: '26100003',
+    password: 'senha123'
+  )
+  login_as(@estudante, scope: :user)
+end
+
+Given ('ele está na página inicial') do
   visit '/home'
 end
 

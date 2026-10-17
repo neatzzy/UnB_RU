@@ -4,7 +4,8 @@ Feature: Catraca verifica o saldo do estudante antes de deixá-lo entrar
   Eu quero ler a identificação do aluno e verificar se há saldo antes de debitar da refeição no momento da passagem.
 
   Background: 
-    Given que um funcionário está na página de "Validação"
+    Given que um funcionário está logado no aplicativo
+    And ele está na página de "Validação"
     Then ele deve ver um painel intitulado "Catraca Atual"
     And uma seção intitulada "Leitura do QR code"
 
