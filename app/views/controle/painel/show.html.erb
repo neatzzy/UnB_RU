@@ -1,0 +1,85 @@
+<% content_for :title, "Configuração de Ponto | RU UnB" %>
+
+<section class="cabecalho-pagina">
+  <div class="cabecalho-titulo">
+    <span class="icone-bloco"><%= icone(:ajustes, tamanho: 22) %></span>
+    <div>
+      <p class="sobretitulo">Configuração de ponto</p>
+      <h1>Configuração de Ponto de Acesso</h1>
+    </div>
+  </div>
+  <div class="cartao-operador">
+    <span class="icone-verde"><%= icone(:cracha, tamanho: 20) %></span>
+    <span>
+      <small>Operador Autenticado</small>
+      <strong><%= funcionario_atual.nome %> · <%= funcionario_atual.identificacao %></strong>
+    </span>
+  </div>
+</section>
+
+<p class="texto-suave">Sessão válida até <strong><%= l sessao_atual.expira_em, format: :short %></strong>.</p>
+
+<% if sessao_atual.ponto_acesso_pendente? %>
+  <section class="cartao" id="ponto-acesso">
+    <div class="passo">
+      <span class="numero-passo">1</span>
+      <div>
+        <h2>Escolha do restaurante e da catraca</h2>
+        <p class="texto-suave">Selecione a unidade operacional e a catraca física que receberá os comandos desta sessão.</p>
+      </div>
+    </div>
+    <div class="aviso-info">
+      <%= icone(:info, tamanho: 18) %>
+      <span>As operações de controle ficam indisponíveis até a confirmação do ponto de acesso.</span>
+    </div>
+    <%= form_with url: controle_root_path, method: :get, class: "formulario" do |f| %>
+      <div class="campo"><%= f.label :restaurante_id, "Restaurante" %><div class="campo-entrada">
+      <%= f.select :restaurante_id, @restaurantes.map { |r| [r.nome, r.id] }, { include_blank: "Selecione um restaurante", selected: @restaurante&.id } %></div></div>
+      <%= f.submit "Selecionar restaurante", class: "botao botao-secundario" %>
+    <% end %>
+    <% if @restaurantes.empty? %><p>Nenhum restaurante disponível</p><% end %>
+    <% if @restaurante %>
+      <div id="catracas-disponiveis">
+        <%= form_with url: controle_ponto_acesso_path, class: "formulario" do |f| %>
+          <%= f.hidden_field :restaurante_id, value: @restaurante.id %>
+          <div class="campo"><%= f.label :catraca_id, "Catraca" %><div class="campo-entrada">
+          <%= f.select :catraca_id, @catracas.map { |c| ["#{c.identificacao} · #{c.piso.nome}", c.id] }, include_blank: "Selecione uma catraca" %></div></div>
+          <%= f.submit "Confirmar ponto de acesso", disabled: @catracas.empty?, class: "botao botao-primario" %>
+        <% end %>
+        <% if @catracas.empty? %><p>Nenhuma catraca disponível neste restaurante</p><% end %>
+      </div>
+    <% end %>
+  </section>
+<% end %>
+
+<% if ponto_acesso_atual %>
+  <section class="cartao" id="ponto-confirmado">
+    <h2>Ponto confirmado</h2>
+    <p><%= ponto_acesso_atual.restaurante.nome %> · <%= ponto_acesso_atual.catraca.identificacao %></p>
+    <% unless sessao_atual.ponto_acesso_pendente? %>
+      <%= button_to "Alterar ponto de acesso", reconfigurar_controle_ponto_acesso_path, class: "botao botao-secundario" %>
+    <% end %>
+  </section>
+<% end %>
+<% restaurantes = @restaurantes %>
+<section class="cartao" id="restaurantes-disponiveis">
+  <h2>Restaurantes e catracas</h2>
+  <% if restaurantes.empty? %>
+    <p class="subtitulo">Nenhum restaurante disponível.</p>
+  <% else %>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <tbody>
+          <% restaurantes.each do |restaurante| %>
+            <tr>
+              <td><%= restaurante.nome %></td>
+              <td class="acoes-linha">
+                <%= link_to "Ver catracas", controle_restaurante_catracas_path(restaurante) %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</section>
