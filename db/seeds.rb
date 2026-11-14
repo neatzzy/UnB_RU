@@ -14,11 +14,18 @@ restaurantes = {
   Restaurante.find_or_create_by!(campus: campus) { |r| r.nome = nome_restaurante }
 end
 
-puts "Semeando catracas..."
+puts "Semeando catracas (online, para o terminal operacional funcionar)..."
+# A coluna `online` nasce false na migration, então sem isto nenhuma catraca
+# fica selecionável no ponto de acesso e o terminal só funciona nos testes.
+# Só vale na criação: a disponibilidade de uma catraca já cadastrada é da
+# administração do restaurante (#8), e o seed não desfaz o que o admin mudou.
 restaurantes.each_with_index do |restaurante, indice|
   pisos = indice.zero? ? [ 1, 1, 2, 2 ] : [ 1, 1 ]
   pisos.each_with_index do |piso, i|
-    restaurante.catracas.find_or_create_by!(numero: i + 1) { |c| c.piso = piso }
+    restaurante.catracas.find_or_create_by!(numero: i + 1) do |c|
+      c.piso = piso
+      c.online = true
+    end
   end
 end
 
@@ -30,8 +37,15 @@ tipos = {
   "almoco" => [ "Almoço", "11:00", "14:30", "4.50" ],
   "jantar" => [ "Jantar", "17:00", "19:30", "4.50" ]
 }.to_h do |chave, (nome, inicio, fim, tarifa)|
-  tipo = TipoRefeicao.find_or_initialize_by(nome: nome)
-  tipo.update!(hora_inicio: inicio, hora_fim: fim, tarifa: tarifa)
+  # Os horários entram só na criação. Reatribuí-los a cada db:seed disparava o
+  # after_update :descartar_time_frames do turno, que apaga as janelas e, em
+  # cascata, as inscrições do FastPass — e ainda desfazia o horário do admin.
+  tipo = TipoRefeicao.find_or_create_by!(nome: nome) do |t|
+    t.hora_inicio = inicio
+    t.hora_fim = fim
+    t.tarifa = tarifa
+  end
+  tipo.update!(tarifa: tarifa) if tipo.tarifa != BigDecimal(tarifa)
   [ chave, tipo ]
 end
 
@@ -91,5 +105,6 @@ if aluno.transacoes.none?
 end
 
 puts "Pronto: #{Universidade.count} universidade, #{Campus.count} campi, #{Restaurante.count} restaurantes, " \
-     "#{Catraca.count} catracas, #{TipoRefeicao.count} tipos de refeição, #{TimeFrame.count} time-frames, " \
-     "#{Refeicao.count} refeições, #{User.count} usuários."
+     "#{Catraca.count} catracas (#{Catraca.where(online: true).count} online), " \
+     "#{TipoRefeicao.count} tipos de refeição, #{TimeFrame.count} time-frames, " \
+     "#{Refeicao.count} refeições, #{InscricaoFastpass.count} inscrições no FastPass, #{User.count} usuários."
