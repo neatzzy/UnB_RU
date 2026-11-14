@@ -15,6 +15,9 @@ module Operador
 
       @resultado = ValidacaoDeAcesso.processar!(catraca: catraca_em_operacao,
         matricula: params[:matricula].to_s.strip, chave: chave, modo: params[:modo].to_s)
+      # Guardado antes de `new`, que emite a chave da próxima leitura: o reenvio
+      # de uma entrega pendente tem que repetir esta chave, e não abrir outra.
+      @chave_em_entrega = params[:chave]
       new
       render :new
     rescue ValidacaoDeAcesso::EventoIncompativel

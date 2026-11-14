@@ -11,4 +11,6 @@
 .painel-de-resultado { display: flex; flex-direction: column; gap: 1rem; }
 .resultado--liberado { color: var(--cor-sucesso); background: var(--cor-sucesso-fundo); padding: 1rem; border-radius: var(--raio); }
 .resultado--bloqueado { color: var(--cor-erro); background: var(--cor-erro-fundo); padding: 1rem; border-radius: var(--raio); }
+.resultado--pendente { color: var(--cor-alerta); background: var(--cor-alerta-fundo); padding: 1rem; border-radius: var(--raio); }
+#formulario-reenvio { margin: 0; }
 @media (max-width: 760px) { .terminal-grade { grid-template-columns: 1fr; } }

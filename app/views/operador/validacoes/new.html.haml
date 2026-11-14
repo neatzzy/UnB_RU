@@ -25,10 +25,17 @@
       %p.painel__nota Catraca simulada neste ambiente de demonstração.
   .card.painel.painel-de-resultado{role: "status"}
     - if @resultado
-      %h2{class: (@resultado.resultado == "ACESSO LIBERADO" ? "resultado--liberado" : "resultado--bloqueado")}= @resultado.resultado
+      %h2{class: "resultado--#{@resultado.estado}"}= @resultado.resultado
       %p= @resultado.motivo
-      - if @resultado.liberado? && !@resultado.comando_enviado_em?
-        %p Comando pendente de entrega à catraca.
+      - if @resultado.entrega_pendente?
+        %p.painel__nota
+          A refeição já foi debitada e a catraca ainda não confirmou o comando.
+          Reenvie esta mesma leitura: não há novo débito. Não leia o QR Code outra vez.
+        = form_with url: terminal_de_validacao_path, id: "formulario-reenvio", class: "formulario", data: { turbo: false } do
+          = hidden_field_tag :chave, @chave_em_entrega, id: "chave-reenvio"
+          = hidden_field_tag :matricula, @resultado.matricula, id: "matricula-reenvio"
+          = hidden_field_tag :modo, @resultado.modo, id: "modo-reenvio"
+          = submit_tag "Reenviar comando à catraca", class: "botao botao--secundario"
       %p Matrícula: #{@resultado.matricula}
       - if @resultado.aluno
         %p Saldo atual: #{number_to_currency(@resultado.aluno.reload.saldo)}

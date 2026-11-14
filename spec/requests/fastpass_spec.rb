@@ -182,12 +182,43 @@ RSpec.describe "Validação FastPass", type: :request do
     dispositivo = Rails.configuration.x.dispositivo_catraca
     allow(dispositivo).to receive(:enviar).and_return(false, true)
     validar
-    expect(response.body).to include("ACESSO BLOQUEADO", "Comando pendente")
+    expect(response.body).to include("COMANDO PENDENTE")
     validar
     expect(response.body).to include("ACESSO LIBERADO")
     expect(aluno.reload.saldo).to eq(13.50)
     expect(aluno.transacoes.count).to eq(1)
     expect(dispositivo).to have_received(:enviar).twice
+  end
+
+  # Entrega pendente anunciada como "ACESSO BLOQUEADO" fazia o operador ler o QR
+  # de novo: outra chave, outro débito. A tela precisa oferecer o reenvio da
+  # mesma chave, que é o caminho idempotente.
+  it "não apresenta entrega pendente como bloqueio e oferece reenviar a mesma chave" do
+    allow(Rails.configuration.x.dispositivo_catraca).to receive(:enviar).and_return(false)
+
+    validar
+
+    expect(response.body).to include("COMANDO PENDENTE", "Reenviar comando à catraca")
+    expect(response.body).not_to include("ACESSO BLOQUEADO")
+    reenvio = Nokogiri::HTML(response.body).at_css("#formulario-reenvio")
+    expect(reenvio.at_css('input[name="chave"]')["value"]).to eq(@chave)
+    expect(reenvio.at_css('input[name="matricula"]')["value"]).to eq(aluno.matricula)
+    expect(reenvio.at_css('input[name="modo"]')["value"]).to eq("FastPass")
+    expect(aluno.reload.saldo).to eq(13.50)
+  end
+
+  it "não debita de novo quando o reenvio da entrega pendente é acionado" do
+    dispositivo = Rails.configuration.x.dispositivo_catraca
+    allow(dispositivo).to receive(:enviar).and_return(false, true)
+    validar
+    reenvio = Nokogiri::HTML(response.body).at_css("#formulario-reenvio")
+
+    post terminal_de_validacao_path, params: reenvio.css("input").to_h { |i| [ i["name"], i["value"] ] }
+
+    expect(response.body).to include("ACESSO LIBERADO")
+    expect(aluno.reload.saldo).to eq(13.50)
+    expect(aluno.transacoes.count).to eq(1)
+    expect(catraca.historicos_catraca.count).to eq(1)
   end
 
   it "desfaz débito e evento se a gravação financeira falhar" do
