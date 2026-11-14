@@ -8,13 +8,14 @@ class ValidacaoDeAcesso
     raise ArgumentError, "Chave obrigatória" if chave.blank?
 
     agora = agora.in_time_zone
+    codigo = matricula.to_s.strip
     evento = ProcessamentoAcesso.find_by(chave: chave)
     unless evento
       ProcessamentoAcesso.transaction do
-        # Bloqueio do aluno serializa os débitos; o índice único protege a repetição.
-        aluno = User.aluno.find_by(matricula: matricula)
+        aluno = User.aluno.find_by(matricula: codigo) || User.aluno.find_by(qr_code: codigo)
         aluno&.lock!
         catraca.lock!
+        matricula_registrada = aluno ? aluno.matricula : codigo
         turno = TipoRefeicao.all.detect do |tipo|
           agora.between?(RegraFastpass.horario_na_data(agora.to_date, tipo.hora_inicio),
                          RegraFastpass.horario_na_data(agora.to_date, tipo.hora_fim))
@@ -35,7 +36,7 @@ class ValidacaoDeAcesso
         motivo ||= "Saldo insuficiente" if aluno && aluno.saldo < tarifa
         liberado = motivo.nil?
         evento = ProcessamentoAcesso.create!(chave: chave, catraca: catraca, aluno: aluno,
-          matricula: matricula, modo: modo, data_hora: agora, liberado: liberado, motivo: motivo || "Validação concluída")
+          matricula: matricula_registrada, modo: modo, data_hora: agora, liberado: liberado, motivo: motivo || "Validação concluída")
         if aluno
           # Projeção de leitura de #7/#9, gravada na mesma transação da decisão:
           # o histórico local e o relatório global leem estes campos direto,
@@ -53,13 +54,15 @@ class ValidacaoDeAcesso
       end
     end
 
-    unless evento.catraca_id == catraca.id && evento.matricula == matricula && evento.modo == modo
+    aluno_referencia = User.aluno.find_by(matricula: codigo) || User.aluno.find_by(qr_code: codigo)
+    matricula_esperada = aluno_referencia ? aluno_referencia.matricula : codigo
+
+    unless evento.catraca_id == catraca.id && evento.matricula == matricula_esperada && evento.modo == modo
       raise EventoIncompativel, "Evento já utilizado em outra leitura"
     end
     evento.enviar_comando!(dispositivo: dispositivo)
     evento
   rescue ActiveRecord::RecordNotUnique
-    # Outra requisição concluiu esta chave. Reaproveita a decisão já persistida.
     retry
   end
 end
