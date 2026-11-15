@@ -15,6 +15,14 @@ RSpec.describe "Ponto de acesso", type: :request do
     post configuracao_de_ponto_path, params: { restaurante_id: ponto.restaurante_id, catraca_id: ponto.id }
   end
 
+  # A gestão (#8) cadastra a unidade só com nome e pisos, sem campus.
+  it "lista restaurante cadastrado sem campus" do
+    Restaurante.create!(nome: "RU Gama", numero_de_pisos: 1).catracas.create!(numero: 7, piso: 1, online: true)
+    get configuracao_de_ponto_path
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("RU Gama", "Catraca 07")
+  end
+
   it "vincula a sessão e limita terminal/histórico à catraca escolhida" do
     aluno = criar_usuario
     outro = criar_usuario
