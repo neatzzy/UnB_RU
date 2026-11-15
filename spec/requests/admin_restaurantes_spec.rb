@@ -61,6 +61,29 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
       expect(response.body).to include("Piso deve estar entre 1 e 3")
     end
 
+    it "associa a catraca já online quando o campo vem marcado" do
+      post admin_catracas_path, params: { catraca: { restaurante_id: darcy.id, numero: "4", piso: "2", online: "1" } }
+      expect(darcy.catracas.find_by(numero: 4)).to be_online
+
+      post admin_catracas_path, params: { catraca: { restaurante_id: darcy.id, numero: "5", piso: "2", online: "0" } }
+      expect(darcy.catracas.find_by(numero: 5)).not_to be_online
+    end
+
+    it "coloca a catraca offline e de volta online" do
+      catraca = darcy.catracas.create!(numero: 4, piso: 2, online: true)
+
+      patch disponibilidade_admin_catraca_path(catraca)
+      expect(catraca.reload).not_to be_online
+      expect(flash[:notice]).to eq("Catraca 04 do RU Darcy Ribeiro está offline")
+
+      get admin_restaurantes_path
+      expect(response.body).to include("Offline", "Colocar online")
+
+      patch disponibilidade_admin_catraca_path(catraca)
+      expect(catraca.reload).to be_online
+      expect(flash[:notice]).to eq("Catraca 04 do RU Darcy Ribeiro está online")
+    end
+
     it "remove uma catraca" do
       catraca = darcy.catracas.create!(numero: 2, piso: 1)
       expect { delete admin_catraca_path(catraca) }.to change(Catraca, :count).by(-1)
@@ -80,6 +103,10 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
         expect { delete admin_restaurante_path(darcy) }.not_to change(Restaurante, :count)
         expect { post admin_catracas_path, params: { catraca: { restaurante_id: darcy.id, numero: "9", piso: "1" } } }
           .not_to change(Catraca, :count)
+
+        catraca = darcy.catracas.create!(numero: 1, piso: 1, online: true)
+        patch disponibilidade_admin_catraca_path(catraca)
+        expect(catraca.reload).to be_online
       end
     end
   end
