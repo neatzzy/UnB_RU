@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   # Administração Geral
   namespace :admin do
     resources :restaurantes, except: :show
-    resources :catracas, only: %i[new create destroy] do
+    resources :catracas, except: %i[index show] do
       patch :disponibilidade, on: :member
     end
     get "relatorio", to: "relatorios#show", as: :relatorio

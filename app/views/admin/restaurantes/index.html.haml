@@ -69,5 +69,6 @@
                                 form: { data: { turbo_confirm: "Colocar a #{catraca.identificacao} offline? O funcionário que estiver operando esta catraca perde o vínculo." } }
                   - else
                     = button_to "Colocar online", disponibilidade_admin_catraca_path(catraca), method: :patch, params: { online: true }, class: "botao botao--texto botao--miudo"
+                  = button_to "Editar", edit_admin_catraca_path(catraca), method: :get, class: "botao botao--texto botao--miudo"
                   = button_to "Remover", admin_catraca_path(catraca), method: :delete, class: "botao botao--texto botao--miudo",
                               form: { data: { turbo_confirm: "Remover a #{catraca.identificacao} do #{restaurante.nome}? Esta ação não pode ser desfeita." } }

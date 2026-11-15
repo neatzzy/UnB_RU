@@ -92,6 +92,23 @@ Funcionalidade: Gestão de Restaurantes e Catracas
     E eu clico no botão "Salvar"
     Então eu devo ver a mensagem "Já existe uma catraca com esse número neste restaurante"
 
+  Cenário: Editar o número e o piso de uma catraca
+    Dado que eu acesso a página de gestão de restaurantes
+    Quando eu clico no botão "Editar" da catraca "Catraca 02"
+    E eu preencho o campo "Número da Catraca" com "5"
+    E eu preencho o campo "Piso" com "3"
+    E eu clico no botão "Salvar"
+    Então eu devo ver a mensagem "Catraca atualizada com sucesso"
+    E a catraca "Catraca 05" deve aparecer no piso 3 do restaurante "RU Darcy Ribeiro"
+    E a catraca "Catraca 02" não deve aparecer no restaurante "RU Darcy Ribeiro"
+
+  Cenário: Editar catraca para um número já usado no restaurante
+    Dado que eu acesso a página de gestão de restaurantes
+    Quando eu clico no botão "Editar" da catraca "Catraca 02"
+    E eu preencho o campo "Número da Catraca" com "1"
+    E eu clico no botão "Salvar"
+    Então eu devo ver a mensagem "Já existe uma catraca com esse número neste restaurante"
+
   Cenário: Remover uma catraca
     Dado que eu acesso a página de gestão de restaurantes
     Quando eu clico no botão "Remover" da catraca "Catraca 02"

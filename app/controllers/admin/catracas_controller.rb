@@ -14,6 +14,21 @@ module Admin
       end
     end
 
+    def edit
+      @catraca = Catraca.find(params[:id])
+    end
+
+    # Só número e piso: o restaurante é fixo e a disponibilidade tem ação própria.
+    def update
+      @catraca = Catraca.find(params[:id])
+
+      if salvar_sem_duplicar(@catraca, :numero_em_uso) { @catraca.update(params.expect(catraca: [ :numero, :piso ])) }
+        redirect_to admin_restaurantes_path, notice: "Catraca atualizada com sucesso"
+      else
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
     def destroy
       catraca = Catraca.find(params[:id])
 
