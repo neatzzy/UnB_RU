@@ -52,6 +52,14 @@ Then('a consolidação do restaurante {string} deve exibir {int} acessos liberad
   expect(linha).to have_css('.arrecadacao', text: valor)
 end
 
+Then('a consolidação da catraca {string} do restaurante {string} deve exibir {int} acessos liberados e arrecadação de {string}') do |catraca, restaurante, acessos, valor|
+  linha = all('table.consolidacao-catracas tbody tr').find do |tr|
+    tr.find('.unidade').text == restaurante && tr.find('.catraca').text == catraca
+  end
+  expect(linha).to have_css('.acessos', text: acessos.to_s)
+  expect(linha).to have_css('.arrecadacao', text: valor)
+end
+
 Then('eu devo receber um arquivo PDF') do
   expect(page.response_headers['Content-Type']).to include('application/pdf')
 end

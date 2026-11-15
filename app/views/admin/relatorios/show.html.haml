@@ -74,6 +74,30 @@
             %td.tabela__numerico.arrecadacao= number_to_currency(linha.arrecadacao)
 
 %section.card.painel
+  %h2.painel__titulo Consolidação por Catraca
+  .tabela-rolavel
+    %table.tabela.consolidacao-catracas
+      %thead
+        %tr
+          %th Unidade
+          %th Catraca
+          %th.tabela__numerico Piso
+          %th.tabela__numerico Acessos liberados
+          %th.tabela__numerico Bloqueados
+          %th.tabela__numerico FastPass
+          %th.tabela__numerico Arrecadação
+      %tbody
+        - @relatorio.consolidacao_por_catraca.each do |linha|
+          %tr
+            %td.unidade= linha.catraca.restaurante.nome
+            %td.catraca= linha.catraca.identificacao
+            %td.tabela__numerico= linha.catraca.piso
+            %td.tabela__numerico.acessos= linha.liberados
+            %td.tabela__numerico= linha.acessos - linha.liberados
+            %td.tabela__numerico= linha.fastpass
+            %td.tabela__numerico.arrecadacao= number_to_currency(linha.arrecadacao)
+
+%section.card.painel
   %h2.painel__titulo Acessos registrados
   - if @relatorio.valid? && @relatorio.acessos.none?
     .estado-vazio

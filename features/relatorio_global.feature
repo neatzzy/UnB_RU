@@ -31,6 +31,12 @@ Funcionalidade: Relatório Global de Acessos
     Então a consolidação do restaurante "RU Darcy Ribeiro" deve exibir 2 acessos liberados e arrecadação de "R$ 9,00"
     E a consolidação do restaurante "RU Gama" deve exibir 1 acessos liberados e arrecadação de "R$ 4,50"
 
+  Cenário: Agrupar os acessos por catraca
+    Dado que eu acesso a página do relatório global
+    Então a consolidação da catraca "Catraca 01" do restaurante "RU Darcy Ribeiro" deve exibir 1 acessos liberados e arrecadação de "R$ 4,50"
+    E a consolidação da catraca "Catraca 04" do restaurante "RU Darcy Ribeiro" deve exibir 1 acessos liberados e arrecadação de "R$ 4,50"
+    E a consolidação da catraca "Catraca 01" do restaurante "RU Gama" deve exibir 1 acessos liberados e arrecadação de "R$ 4,50"
+
   Cenário: Filtrar os acessos por restaurante
     Dado que eu acesso a página do relatório global
     Quando eu seleciono "RU Gama" no campo "Restaurante"

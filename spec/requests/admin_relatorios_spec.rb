@@ -17,7 +17,7 @@ RSpec.describe "Relatório global de acessos", type: :request do
     it "mostra os acessos e os totais" do
       get admin_relatorio_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(aluno.matricula, "Catraca 04", "R$ 4,50")
+      expect(response.body).to include(aluno.matricula, "Catraca 04", "R$ 4,50", "Consolidação por Catraca")
     end
 
     it "avisa quando o período está invertido" do
@@ -58,6 +58,7 @@ RSpec.describe "Relatório global de acessos", type: :request do
 
       texto = PDF::Reader.new(StringIO.new(response.body)).pages.map(&:text).join("\n")
       expect(texto).to include("Relatório Global de Operação", "RU Darcy Ribeiro", "Catraca 04", aluno.matricula, "R$ 4,50")
+      expect(texto).to include("Consolidação por catraca", "RU Darcy Ribeiro, Catraca 04 (piso 1): 1 liberados")
     end
 
     it "não gera PDF sem acessos e mantém os filtros" do

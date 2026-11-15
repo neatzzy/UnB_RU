@@ -35,6 +35,19 @@ RSpec.describe RelatorioGlobal, type: :model do
     expect(gama_linha.arrecadacao).to eq(2.5)
   end
 
+  it "consolida por catraca na ordem de unidade, piso e número" do
+    linhas = RelatorioGlobal.new.consolidacao_por_catraca
+    expect(linhas.map(&:catraca)).to eq([ catraca_darcy, catraca_darcy_2, catraca_gama ])
+    expect(linhas[1].to_h.slice(:acessos, :liberados, :fastpass, :arrecadacao))
+      .to eq(acessos: 2, liberados: 1, fastpass: 1, arrecadacao: 4.5)
+    expect(linhas.sum(&:arrecadacao)).to eq(RelatorioGlobal.new.arrecadacao)
+  end
+
+  it "consolida só as catracas dentro dos filtros" do
+    linhas = RelatorioGlobal.new(restaurante_id: darcy.id).consolidacao_por_catraca
+    expect(linhas.map(&:catraca)).to eq([ catraca_darcy, catraca_darcy_2 ])
+  end
+
   it "filtra por restaurante e por catraca" do
     expect(RelatorioGlobal.new(restaurante_id: gama.id).total_acessos).to eq(1)
     expect(RelatorioGlobal.new(catraca_id: catraca_darcy_2.id).total_acessos).to eq(2)

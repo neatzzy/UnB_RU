@@ -14,6 +14,7 @@ class RelatorioGlobal
   validate :periodo_em_ordem
 
   Consolidacao = Struct.new(:restaurante, :acessos, :liberados, :fastpass, :arrecadacao)
+  ConsolidacaoDaCatraca = Struct.new(:catraca, :acessos, :liberados, :fastpass, :arrecadacao)
 
   # Todos os acessos dos filtros: base dos totais e do PDF, que é o documento de auditoria.
   def acessos
@@ -35,17 +36,21 @@ class RelatorioGlobal
   def acessos_fastpass = acessos.fastpass.count
   def arrecadacao = acessos.liberados.sum(:tarifa)
 
-  # Somada no banco, sem carregar os acessos em memória.
   def consolidacao
-    por_restaurante = acessos.unscope(:order, :includes).group("catracas.restaurante_id")
-    total = por_restaurante.count
-    liberados = por_restaurante.liberados.count
-    fastpass = por_restaurante.fastpass.count
-    arrecadado = por_restaurante.liberados.sum(:tarifa)
+    somas = somar_por("catracas.restaurante_id")
 
-    Restaurante.where(id: total.keys).order(:nome).map do |restaurante|
-      id = restaurante.id
-      Consolidacao.new(restaurante, total[id], liberados.fetch(id, 0), fastpass.fetch(id, 0), arrecadado.fetch(id, 0))
+    Restaurante.where(id: somas.keys).order(:nome).map do |restaurante|
+      Consolidacao.new(restaurante, *somas[restaurante.id])
+    end
+  end
+
+  # Agrupamento por catraca pedido na #9, na ordem da gestão: unidade, piso e número.
+  def consolidacao_por_catraca
+    somas = somar_por("historicos_catraca.catraca_id")
+    catracas = Catraca.where(id: somas.keys).includes(:restaurante).joins(:restaurante)
+
+    catracas.order("restaurantes.nome", :piso, :numero).map do |catraca|
+      ConsolidacaoDaCatraca.new(catraca, *somas[catraca.id])
     end
   end
 
@@ -58,6 +63,18 @@ class RelatorioGlobal
   end
 
   private
+
+  # { id => [acessos, liberados, fastpass, arrecadação] }, somado no banco sem carregar os acessos.
+  def somar_por(coluna)
+    grupos = acessos.unscope(:order, :includes).group(coluna)
+    liberados = grupos.liberados.count
+    fastpass = grupos.fastpass.count
+    arrecadado = grupos.liberados.sum(:tarifa)
+
+    grupos.count.to_h do |id, total|
+      [ id, [ total, liberados.fetch(id, 0), fastpass.fetch(id, 0), arrecadado.fetch(id, 0) ] ]
+    end
+  end
 
   def consultar
     return HistoricoCatraca.none if invalid?

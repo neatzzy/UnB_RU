@@ -28,6 +28,14 @@ class RelatorioGlobalPdf
     end
     pdf.move_down 12
 
+    pdf.text texto("Consolidação por catraca"), size: 13, style: :bold
+    @relatorio.consolidacao_por_catraca.each do |linha|
+      catraca = linha.catraca
+      pdf.text texto("#{catraca.restaurante.nome}, #{catraca.identificacao} (piso #{catraca.piso}): #{linha.liberados} liberados, " \
+                     "#{linha.acessos - linha.liberados} bloqueados, #{linha.fastpass} FastPass, #{number_to_currency(linha.arrecadacao)}"), size: 10
+    end
+    pdf.move_down 12
+
     pdf.text texto("Acessos"), size: 13, style: :bold
     pdf.move_down 4
     @relatorio.acessos.each do |acesso|
