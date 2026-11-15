@@ -16,7 +16,8 @@
           %label.opcao-cartao
             = radio_button_tag :restaurante_id, restaurante.id, params[:restaurante_id].to_s == restaurante.id.to_s
             %strong= restaurante.nome
-            %small= restaurante.campus.nome
+            - if restaurante.campus
+              %small= restaurante.campus.nome
       %fieldset.catracas-fisicas
         %legend Selecione a Catraca Física
         - @restaurantes.each do |restaurante|

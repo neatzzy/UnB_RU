@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   post   "login",  to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
 
-  # Páginas iniciais do funcionário (US05) e do administrador (US08), ainda em construção.
+  # Terminal Operacional do funcionário (US05).
   scope module: :operador do
     get "configuracao-de-ponto", to: "pontos_de_acesso#edit", as: :configuracao_de_ponto
     post "configuracao-de-ponto", to: "pontos_de_acesso#update"
@@ -20,11 +20,14 @@ Rails.application.routes.draw do
     post "terminal-de-validacao", to: "validacoes#create"
     get "historico-local", to: "historicos#index", as: :historico_local
   end
-  get "admin/restaurantes", to: "paginas#em_construcao", as: :admin_restaurantes, defaults: { area: "Administração Geral" }
 
 
   # Administração Geral
   namespace :admin do
+    resources :restaurantes, except: :show
+    resources :catracas, except: %i[index show] do
+      patch :disponibilidade, on: :member
+    end
     resources :turnos, only: %i[index edit update] do
       patch :configurar_time_frames, on: :collection
     end

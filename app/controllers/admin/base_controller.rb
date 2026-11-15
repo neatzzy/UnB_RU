@@ -7,6 +7,15 @@ module Admin
 
     private
 
+    # As validações de unicidade consultam antes de gravar; em requisições simultâneas quem
+    # barra a duplicata é o índice único, e o erro vira a mesma mensagem da validação.
+    def salvar_sem_duplicar(registro, erro)
+      yield
+    rescue ActiveRecord::RecordNotUnique
+      registro.errors.add(:base, erro)
+      false
+    end
+
     def exigir_administrador
       return if current_user.administrador?
 
