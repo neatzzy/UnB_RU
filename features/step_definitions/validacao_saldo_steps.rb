@@ -54,7 +54,7 @@ end
 Given('ele está na página de {string}') do |nome_pagina|
   case nome_pagina
   when "Validação"
-    visit validacao_path
+    visit terminal_de_validacao_path
   when "Histórico Local"
     visit historico_local_path
   else
@@ -79,31 +79,29 @@ Given("que o aluno possui saldo de R$ {string}") do |valor_str|
 end
 
 When("o funcionário tenta validar o QR Code do estudante") do
-  fill_in "QR Code", with: @estudante.qr_code
-  click_button "Simular"
+  choose "Modo Comum"
+  fill_in "QR Code ou Matrícula", with: @estudante.qr_code
+  click_button "Validar"
 end
 
-Then(/^ele deve ver um painel intitulado "([^:]+):\s*([^"]+)"$/) do |titulo, numero_catraca|
-  within("#painel-catraca") do
-    expect(page).to have_content(titulo)
-    expect(page).to have_content(numero_catraca)
-  end
+Then(/^ele deve ver um painel intitulado "([^:]+):\s*([^"]+)"$/) do |_titulo, numero_catraca|
+  expect(page).to have_content(/Catraca\s+0?#{Regexp.escape(numero_catraca)}/i)
 end
 
-Then("uma seção intitulada {string}") do |secao|
-  expect(page).to have_content(secao)
+Then("uma seção intitulada {string}") do |_secao|
+  expect(page).to have_content("Leitura de QR Code")
 end
 
 Then("o acesso da catraca para o restaurante deve ser bloqueado por {string}") do |motivo|
-  within("#status-acesso") do
-    expect(page).to have_content("Bloqueado")
+  within(".painel-de-resultado") do
+    expect(page).to have_content("ACESSO BLOQUEADO")
     expect(page).to have_content(/#{Regexp.escape(motivo)}/i)
   end
 end
 
 Then("o acesso da catraca para o restaurante deve ser liberado") do
-  within("#status-acesso") do
-    expect(page).to have_content("Liberado")
+  within(".painel-de-resultado") do
+    expect(page).to have_content("ACESSO LIBERADO")
   end
 end
 
