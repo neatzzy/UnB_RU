@@ -41,6 +41,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.integer "piso", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "online", default: false, null: false
     t.index ["funcionario_id"], name: "index_catracas_on_funcionario_id", unique: true
     t.index ["restaurante_id", "numero"], name: "index_catracas_on_restaurante_id_and_numero", unique: true
     t.index ["restaurante_id"], name: "index_catracas_on_restaurante_id"
@@ -52,6 +53,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.datetime "data_hora", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "modo_validacao", null: false
+    t.decimal "tarifa", precision: 8, scale: 2, null: false
+    t.string "status", null: false
+    t.string "motivo"
     t.index ["aluno_id", "data_hora"], name: "index_historicos_catraca_on_aluno_id_and_data_hora"
     t.index ["aluno_id"], name: "index_historicos_catraca_on_aluno_id"
     t.index ["catraca_id", "data_hora"], name: "index_historicos_catraca_on_catraca_id_and_data_hora"
@@ -74,6 +79,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.index ["refeicao_id"], name: "index_inscricoes_fastpass_on_refeicao_id"
     t.index ["restaurante_id"], name: "index_inscricoes_fastpass_on_restaurante_id"
     t.index ["time_frame_id"], name: "index_inscricoes_fastpass_on_time_frame_id"
+  end
+
+  create_table "processamentos_acesso", force: :cascade do |t|
+    t.string "chave", null: false
+    t.integer "catraca_id", null: false
+    t.integer "aluno_id"
+    t.integer "historico_catraca_id"
+    t.integer "transacao_id"
+    t.string "matricula", null: false
+    t.string "modo", null: false
+    t.boolean "liberado", default: false, null: false
+    t.string "motivo", null: false
+    t.datetime "data_hora", null: false
+    t.datetime "comando_enviado_em"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aluno_id"], name: "index_processamentos_acesso_on_aluno_id"
+    t.index ["catraca_id"], name: "index_processamentos_acesso_on_catraca_id"
+    t.index ["chave"], name: "index_processamentos_acesso_on_chave", unique: true
+    t.index ["historico_catraca_id"], name: "index_processamentos_acesso_on_historico_catraca_id", unique: true
+    t.index ["transacao_id"], name: "index_processamentos_acesso_on_transacao_id", unique: true
+  end
+
+  create_table "recargas", force: :cascade do |t|
+    t.integer "aluno_id", null: false
+    t.string "chave", null: false
+    t.integer "quantidade", null: false
+    t.decimal "valor", precision: 10, scale: 2, null: false
+    t.string "metodo", null: false
+    t.string "status", default: "pendente", null: false
+    t.integer "transacao_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aluno_id"], name: "index_recargas_on_aluno_id"
+    t.index ["chave"], name: "index_recargas_on_chave", unique: true
+    t.index ["transacao_id"], name: "index_recargas_on_transacao_id", unique: true
+    t.check_constraint "quantidade BETWEEN 1 AND 50", name: "recarga_quantidade_valida"
+    t.check_constraint "valor > 0", name: "recarga_valor_positivo"
   end
 
   create_table "refeicoes", force: :cascade do |t|
@@ -116,7 +159,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.datetime "updated_at", null: false
     t.integer "granularidade_minutos"
     t.integer "tolerancia_minutos"
+    t.decimal "tarifa", precision: 10, scale: 2, default: "4.5", null: false
     t.index ["nome"], name: "index_tipos_refeicao_on_nome", unique: true
+    t.check_constraint "tarifa > 0", name: "tipo_refeicao_tarifa_positiva"
   end
 
   create_table "transacoes", force: :cascade do |t|
@@ -166,6 +211,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
   add_foreign_key "inscricoes_fastpass", "restaurantes"
   add_foreign_key "inscricoes_fastpass", "time_frames"
   add_foreign_key "inscricoes_fastpass", "users", column: "aluno_id"
+  add_foreign_key "processamentos_acesso", "catracas"
+  add_foreign_key "processamentos_acesso", "historicos_catraca", column: "historico_catraca_id"
+  add_foreign_key "processamentos_acesso", "transacoes"
+  add_foreign_key "processamentos_acesso", "users", column: "aluno_id"
+  add_foreign_key "recargas", "transacoes"
+  add_foreign_key "recargas", "users", column: "aluno_id"
   add_foreign_key "refeicoes", "restaurantes"
   add_foreign_key "refeicoes", "tipos_refeicao", column: "tipo_refeicao_id"
   add_foreign_key "restaurantes", "campi"
