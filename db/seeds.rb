@@ -104,6 +104,16 @@ if aluno.transacoes.none?
   ])
 end
 
+puts "Semeando funcionário e alunos para validação de saldo..."
+[
+  { nome: "Estudante Sem Saldo", matricula: "26100001", perfil: :aluno, saldo: 0.0, qr_code: "QRCODE_001_SSALDO" },
+  { nome: "Estudante Com Saldo", matricula: "26100002", perfil: :aluno, saldo: 50.0, qr_code: "QRCODE_002_CSALDO" }
+].each do |atributos|
+User.find_or_create_by!(matricula: atributos[:matricula]) do |u|
+    u.assign_attributes(atributos.merge(password: "senha123"))
+  end
+end
+
 puts "Pronto: #{Universidade.count} universidade, #{Campus.count} campi, #{Restaurante.count} restaurantes, " \
      "#{Catraca.count} catracas (#{Catraca.where(online: true).count} online), " \
      "#{TipoRefeicao.count} tipos de refeição, #{TimeFrame.count} time-frames, " \

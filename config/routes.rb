@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   end
   get "admin/restaurantes", to: "paginas#em_construcao", as: :admin_restaurantes, defaults: { area: "Administração Geral" }
 
+
   # Administração Geral
   namespace :admin do
     resources :turnos, only: %i[index edit update] do
