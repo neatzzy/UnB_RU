@@ -1,12 +1,14 @@
 module Estudante
   # Inscrição do aluno logado em uma janela do FastPass (US13).
   class InscricoesFastpassController < BaseController
+    before_action :exigir_aluno
+
     def create
       time_frame = TimeFrame.find_by(id: params[:time_frame_id])
       return redirect_to(fastpass_path, alert: "Escolha um horário") unless time_frame
 
       inscricao = current_user.inscricoes_fastpass.new(time_frame: time_frame, data: Date.current)
-      if inscricao.save
+      if salvar(inscricao)
         redirect_to fastpass_path, notice: "Inscrição no sorteio realizada com sucesso"
       else
         redirect_to fastpass_path, alert: inscricao.errors.full_messages.to_sentence
@@ -25,6 +27,17 @@ module Estudante
       else
         redirect_to fastpass_path, alert: "O sorteio já foi realizado. Não é possível cancelar esta inscrição"
       end
+    end
+
+    private
+
+    # Dois envios ao mesmo tempo passam os dois pela validação; o índice único do
+    # banco barra o segundo, que recebe a mesma mensagem da validação.
+    def salvar(inscricao)
+      inscricao.save
+    rescue ActiveRecord::RecordNotUnique
+      inscricao.errors.add(:base, :ja_inscrito_no_turno, turno: inscricao.time_frame.tipo_refeicao.nome)
+      false
     end
   end
 end

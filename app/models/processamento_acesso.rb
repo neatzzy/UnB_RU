@@ -8,7 +8,23 @@ class ProcessamentoAcesso < ApplicationRecord
   validates :modo, inclusion: { in: %w[FastPass Comum] }
 
   def comando = liberado? ? :liberar : :bloquear
-  def resultado = liberado? && comando_enviado_em? ? "ACESSO LIBERADO" : "ACESSO BLOQUEADO"
+
+  # Liberado com débito feito, mas sem confirmação da catraca. Estado próprio:
+  # exibir "ACESSO BLOQUEADO" aqui levava o operador a ler o QR de novo, o que
+  # abre outra chave e debita a refeição mais uma vez. A entrega é retomada
+  # reenviando a MESMA chave, que não gera novo débito.
+  def entrega_pendente? = liberado? && !comando_enviado_em?
+
+  RESULTADOS = { liberado: "ACESSO LIBERADO", pendente: "COMANDO PENDENTE",
+                 bloqueado: "ACESSO BLOQUEADO" }.freeze
+
+  def estado
+    return :pendente if entrega_pendente?
+
+    liberado? ? :liberado : :bloqueado
+  end
+
+  def resultado = RESULTADOS.fetch(estado)
 
   # Caixa de saída persistente: falha do dispositivo pode ser tentada novamente
   # sem novo débito. O adaptador deve deduplicar a mesma chave no dispositivo.

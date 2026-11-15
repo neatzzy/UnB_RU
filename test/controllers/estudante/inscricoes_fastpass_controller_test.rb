@@ -18,6 +18,20 @@ class Estudante::InscricoesFastpassControllerTest < ActionDispatch::IntegrationT
     assert_redirected_to login_path
   end
 
+  test "funcionário não vê nem se inscreve no FastPass" do
+    funcionario = User.create!(nome: "Servidor", matricula: "1984999", password: "senha123", perfil: :funcionario)
+    entrar_como funcionario
+
+    get fastpass_path
+    assert_redirected_to home_path
+
+    assert_no_difference("InscricaoFastpass.count") do
+      post fastpass_inscricoes_path, params: { time_frame_id: @janela.id }
+    end
+    assert_redirected_to home_path
+    assert_equal "O FastPass é exclusivo para alunos", flash[:alert]
+  end
+
   test "inscreve o aluno com status inscrito" do
     entrar_como @aluno
 
