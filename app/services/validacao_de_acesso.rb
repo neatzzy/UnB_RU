@@ -8,13 +8,17 @@ class ValidacaoDeAcesso
     raise ArgumentError, "Chave obrigatória" if chave.blank?
 
     agora = agora.in_time_zone
+    codigo = matricula.to_s.strip
+    matricula_esperada = nil
     evento = ProcessamentoAcesso.find_by(chave: chave)
     unless evento
       ProcessamentoAcesso.transaction do
-        # Bloqueio do aluno serializa os débitos; o índice único protege a repetição.
-        aluno = User.aluno.find_by(matricula: matricula)
+        # Lock pessimista no aluno e na catraca evita corrida entre duas leituras simultâneas
+        # (duplo débito de saldo ou dupla liberação no mesmo ponto de acesso).
+        aluno = User.aluno.find_by(matricula: codigo) || User.aluno.find_by(qr_code: codigo)
         aluno&.lock!
         catraca.lock!
+        matricula_esperada = aluno ? aluno.matricula : codigo
         turno = TipoRefeicao.all.detect do |tipo|
           agora.between?(RegraFastpass.horario_na_data(agora.to_date, tipo.hora_inicio),
                          RegraFastpass.horario_na_data(agora.to_date, tipo.hora_fim))
@@ -35,7 +39,7 @@ class ValidacaoDeAcesso
         motivo ||= "Saldo insuficiente" if aluno && aluno.saldo < tarifa
         liberado = motivo.nil?
         evento = ProcessamentoAcesso.create!(chave: chave, catraca: catraca, aluno: aluno,
-          matricula: matricula, modo: modo, data_hora: agora, liberado: liberado, motivo: motivo || "Validação concluída")
+          matricula: matricula_esperada, modo: modo, data_hora: agora, liberado: liberado, motivo: motivo || "Validação concluída")
         if aluno
           # Projeção de leitura de #7/#9, gravada na mesma transação da decisão:
           # o histórico local e o relatório global leem estes campos direto,
@@ -53,13 +57,16 @@ class ValidacaoDeAcesso
       end
     end
 
-    unless evento.catraca_id == catraca.id && evento.matricula == matricula && evento.modo == modo
+    matricula_esperada ||= (User.aluno.find_by(matricula: codigo) || User.aluno.find_by(qr_code: codigo))&.matricula || codigo
+
+    unless evento.catraca_id == catraca.id && evento.matricula == matricula_esperada && evento.modo == modo
       raise EventoIncompativel, "Evento já utilizado em outra leitura"
     end
     evento.enviar_comando!(dispositivo: dispositivo)
     evento
   rescue ActiveRecord::RecordNotUnique
-    # Outra requisição concluiu esta chave. Reaproveita a decisão já persistida.
+    # Outra requisição concorrente gravou a mesma chave de idempotência antes desta transação:
+    # reexecuta o fluxo para carregar o evento persistido e verificar compatibilidade.
     retry
   end
 end

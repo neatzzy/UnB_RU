@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get "historico-local", to: "historicos#index", as: :historico_local
   end
 
+
   # Administração Geral
   namespace :admin do
     resources :restaurantes, except: :show

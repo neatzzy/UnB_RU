@@ -159,9 +159,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.time "hora_fim", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "tarifa", precision: 10, scale: 2, default: "4.5", null: false
     t.integer "granularidade_minutos"
     t.integer "tolerancia_minutos"
-    t.decimal "tarifa", precision: 10, scale: 2, default: "4.5", null: false
     t.index ["nome"], name: "index_tipos_refeicao_on_nome", unique: true
     t.check_constraint "tarifa > 0", name: "tipo_refeicao_tarifa_positiva"
   end
@@ -199,8 +199,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.decimal "saldo", precision: 10, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "qr_code"
     t.index ["matricula"], name: "index_users_on_matricula", unique: true
     t.index ["perfil"], name: "index_users_on_perfil"
+    t.index ["qr_code"], name: "index_users_on_qr_code", unique: true
   end
 
   add_foreign_key "campi", "universidades"
