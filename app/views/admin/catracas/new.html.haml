@@ -31,6 +31,9 @@
         .campo__entrada
           = icon :map_pin
           = f.text_field :piso, inputmode: "numeric", placeholder: "Ex.: 2"
+    .campo-caixa
+      = f.check_box :online
+      = f.label :online, "Catraca online (disponível para o Terminal Operacional)"
 
     = f.button class: "botao botao--primario" do
       = icon :save

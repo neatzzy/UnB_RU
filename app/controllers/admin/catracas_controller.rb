@@ -1,7 +1,7 @@
 module Admin
   class CatracasController < BaseController
     def new
-      @catraca = Catraca.new(restaurante_id: params[:restaurante_id])
+      @catraca = Catraca.new(restaurante_id: params[:restaurante_id], online: true)
     end
 
     def create
@@ -24,10 +24,19 @@ module Admin
       end
     end
 
+    # Catraca offline não pode ser escolhida no Configurar Ponto e bloqueia as leituras no terminal.
+    def disponibilidade
+      catraca = Catraca.find(params[:id])
+      catraca.update!(online: !catraca.online?)
+
+      estado = catraca.online? ? "online" : "offline"
+      redirect_to admin_restaurantes_path, notice: "#{catraca.identificacao} do #{catraca.restaurante.nome} está #{estado}"
+    end
+
     private
 
     def catraca_params
-      params.expect(catraca: [ :restaurante_id, :numero, :piso ])
+      params.expect(catraca: [ :restaurante_id, :numero, :piso, :online ])
     end
   end
 end

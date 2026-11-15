@@ -17,6 +17,7 @@ pt-BR:
         numero: "Número da Catraca"
         piso: "Piso"
         restaurante: "Restaurante"
+        online: "Online"
     errors:
       messages:
         restrict_dependent_destroy:

@@ -24,7 +24,9 @@ Rails.application.routes.draw do
   # Administração Geral
   namespace :admin do
     resources :restaurantes, except: :show
-    resources :catracas, only: %i[new create destroy]
+    resources :catracas, only: %i[new create destroy] do
+      patch :disponibilidade, on: :member
+    end
     resources :turnos, only: %i[index edit update] do
       patch :configurar_time_frames, on: :collection
     end

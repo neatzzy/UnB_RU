@@ -55,5 +55,17 @@
           .restaurante__catracas
             - catracas.each do |catraca|
               .catraca
-                %strong= catraca.identificacao
-                = button_to "Remover", admin_catraca_path(catraca), method: :delete, class: "botao botao--texto botao--miudo"
+                .catraca__info
+                  %strong= catraca.identificacao
+                  - if catraca.online?
+                    %span.etiqueta.etiqueta--sucesso Online
+                  - else
+                    %span.etiqueta.etiqueta--neutra Offline
+                .catraca__acoes
+                  - if catraca.online?
+                    = button_to "Colocar offline", disponibilidade_admin_catraca_path(catraca), method: :patch,
+                                class: "botao botao--texto botao--miudo",
+                                form: { data: { turbo_confirm: "Colocar a #{catraca.identificacao} offline? O funcionário que estiver operando esta catraca perde o vínculo." } }
+                  - else
+                    = button_to "Colocar online", disponibilidade_admin_catraca_path(catraca), method: :patch, class: "botao botao--texto botao--miudo"
+                  = button_to "Remover", admin_catraca_path(catraca), method: :delete, class: "botao botao--texto botao--miudo"
