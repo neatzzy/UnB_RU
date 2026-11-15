@@ -29,4 +29,5 @@ class User < ApplicationRecord
                         format: { with: FORMATO_MATRICULA, message: :formato_matricula, allow_blank: true }
   validates :password, length: { minimum: TAMANHO_MINIMO_SENHA }, allow_nil: true
   validates :saldo, numericality: { greater_than_or_equal_to: 0 }
+  validates :qr_code, uniqueness: true, allow_blank: true
 end

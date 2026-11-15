@@ -40,6 +40,7 @@ pt-BR:
           attributes:
             base:
               numero_em_uso: "Já existe uma catraca com esse número neste restaurante"
+              possui_acessos: "Esta catraca já registrou acessos e não pode ser removida. Coloque-a offline para tirá-la de operação"
             restaurante:
               required: "deve ser selecionado"
             piso:

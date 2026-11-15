@@ -72,16 +72,59 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
     it "coloca a catraca offline e de volta online" do
       catraca = darcy.catracas.create!(numero: 4, piso: 2, online: true)
 
-      patch disponibilidade_admin_catraca_path(catraca)
+      patch disponibilidade_admin_catraca_path(catraca), params: { online: false }
       expect(catraca.reload).not_to be_online
       expect(flash[:notice]).to eq("Catraca 04 do RU Darcy Ribeiro está offline")
 
       get admin_restaurantes_path
       expect(response.body).to include("Offline", "Colocar online")
 
-      patch disponibilidade_admin_catraca_path(catraca)
+      patch disponibilidade_admin_catraca_path(catraca), params: { online: true }
       expect(catraca.reload).to be_online
       expect(flash[:notice]).to eq("Catraca 04 do RU Darcy Ribeiro está online")
+    end
+
+    it "mantém a catraca offline quando o pedido de offline é reenviado" do
+      catraca = darcy.catracas.create!(numero: 4, piso: 2, online: true)
+
+      2.times { patch disponibilidade_admin_catraca_path(catraca), params: { online: false } }
+      expect(catraca.reload).not_to be_online
+    end
+
+    it "mantém a catraca que já registrou acessos" do
+      catraca = darcy.catracas.create!(numero: 2, piso: 1)
+      catraca.historicos_catraca.create!(aluno: criar_usuario, data_hora: Time.current, modo_validacao: "Comum",
+                                         status: "Liberado", tarifa: 4.5)
+
+      expect { delete admin_catraca_path(catraca) }.not_to change(HistoricoCatraca, :count)
+      expect(Catraca.exists?(catraca.id)).to be(true)
+      expect(flash[:alert]).to include("já registrou acessos e não pode ser removida")
+    end
+
+    it "pede confirmação antes de remover unidade ou catraca" do
+      darcy.catracas.create!(numero: 4, piso: 2)
+      get admin_restaurantes_path
+      expect(response.body).to include("Remover o RU Darcy Ribeiro?", "Remover a Catraca 04 do RU Darcy Ribeiro?")
+    end
+
+    it "trata como nome repetido a duplicata barrada só pelo índice único" do
+      allow_any_instance_of(Restaurante).to receive(:nome_unico)
+
+      expect {
+        post admin_restaurantes_path, params: { restaurante: { nome: "RU Darcy Ribeiro", numero_de_pisos: "1" } }
+      }.not_to change(Restaurante, :count)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("Já existe um restaurante com esse nome")
+    end
+
+    it "trata como número repetido a catraca barrada só pelo índice único" do
+      darcy.catracas.create!(numero: 4, piso: 1)
+      allow_any_instance_of(Catraca).to receive(:numero_unico_no_restaurante)
+
+      expect {
+        post admin_catracas_path, params: { catraca: { restaurante_id: darcy.id, numero: "4", piso: "2" } }
+      }.not_to change(Catraca, :count)
+      expect(response.body).to include("Já existe uma catraca com esse número neste restaurante")
     end
 
     it "remove uma catraca" do
@@ -105,7 +148,7 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
           .not_to change(Catraca, :count)
 
         catraca = darcy.catracas.create!(numero: 1, piso: 1, online: true)
-        patch disponibilidade_admin_catraca_path(catraca)
+        patch disponibilidade_admin_catraca_path(catraca), params: { online: false }
         expect(catraca.reload).to be_online
       end
     end

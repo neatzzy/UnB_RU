@@ -13,7 +13,7 @@ module Admin
     def create
       @restaurante = Restaurante.new(restaurante_params)
 
-      if @restaurante.save
+      if salvar_sem_duplicar(@restaurante, :nome_em_uso) { @restaurante.save }
         redirect_to admin_restaurantes_path, notice: "Restaurante cadastrado com sucesso"
       else
         render :new, status: :unprocessable_entity
@@ -24,7 +24,7 @@ module Admin
     end
 
     def update
-      if @restaurante.update(restaurante_params)
+      if salvar_sem_duplicar(@restaurante, :nome_em_uso) { @restaurante.update(restaurante_params) }
         redirect_to admin_restaurantes_path, notice: "Restaurante atualizado com sucesso"
       else
         render :edit, status: :unprocessable_entity
