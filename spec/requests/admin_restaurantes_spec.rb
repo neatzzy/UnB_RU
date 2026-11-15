@@ -127,6 +127,29 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
       expect(response.body).to include("Já existe uma catraca com esse número neste restaurante")
     end
 
+    it "edita o número e o piso de uma catraca, mantendo restaurante e disponibilidade" do
+      gama = Restaurante.create!(nome: "RU Gama", numero_de_pisos: 1)
+      catraca = darcy.catracas.create!(numero: 2, piso: 1, online: true)
+
+      get edit_admin_catraca_path(catraca)
+      expect(response.body).to include("Editar Catraca 02 do RU Darcy Ribeiro")
+
+      patch admin_catraca_path(catraca), params: { catraca: { numero: "5", piso: "3", restaurante_id: gama.id, online: "0" } }
+      expect(response).to redirect_to(admin_restaurantes_path)
+      expect(flash[:notice]).to eq("Catraca atualizada com sucesso")
+      expect(catraca.reload).to have_attributes(numero: 5, piso: 3, restaurante_id: darcy.id, online: true)
+    end
+
+    it "recusa edição para piso inexistente ou número repetido" do
+      darcy.catracas.create!(numero: 1, piso: 1)
+      catraca = darcy.catracas.create!(numero: 2, piso: 1)
+
+      patch admin_catraca_path(catraca), params: { catraca: { numero: "1", piso: "4" } }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("Piso deve estar entre 1 e 3", "Já existe uma catraca com esse número neste restaurante")
+      expect(catraca.reload).to have_attributes(numero: 2, piso: 1)
+    end
+
     it "remove uma catraca" do
       catraca = darcy.catracas.create!(numero: 2, piso: 1)
       expect { delete admin_catraca_path(catraca) }.to change(Catraca, :count).by(-1)
@@ -149,7 +172,8 @@ RSpec.describe "Gestão de restaurantes e catracas", type: :request do
 
         catraca = darcy.catracas.create!(numero: 1, piso: 1, online: true)
         patch disponibilidade_admin_catraca_path(catraca), params: { online: false }
-        expect(catraca.reload).to be_online
+        patch admin_catraca_path(catraca), params: { catraca: { numero: "8", piso: "2" } }
+        expect(catraca.reload).to have_attributes(online: true, numero: 1, piso: 1)
       end
     end
   end
