@@ -11,10 +11,11 @@ module DadosDeTeste
                  password: "senha123", perfil: perfil, saldo: saldo)
   end
 
-  def criar_restaurante(nome: "RU Teste")
+  # O nome do restaurante é único e as catracas dos specs ficam até o piso 3.
+  def criar_restaurante(nome: "RU Teste #{SecureRandom.hex(4)}")
     universidade = Universidade.find_or_create_by!(nome: "UnB")
     campus = universidade.campi.create!(nome: "Campus #{SecureRandom.hex(4)}")
-    Restaurante.create!(nome: nome, campus: campus)
+    Restaurante.create!(nome: nome, campus: campus, numero_de_pisos: 3)
   end
 
   def entrar_como(usuario)
