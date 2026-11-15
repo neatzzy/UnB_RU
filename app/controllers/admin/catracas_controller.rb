@@ -7,7 +7,7 @@ module Admin
     def create
       @catraca = Catraca.new(catraca_params)
 
-      if @catraca.save
+      if salvar_sem_duplicar(@catraca, :numero_em_uso) { @catraca.save }
         redirect_to admin_restaurantes_path, notice: "Catraca associada com sucesso"
       else
         render :new, status: :unprocessable_entity
@@ -25,9 +25,10 @@ module Admin
     end
 
     # Catraca offline não pode ser escolhida no Configurar Ponto e bloqueia as leituras no terminal.
+    # Recebe o estado desejado, e não um "inverter": clique duplo ou reenvio não desfazem a ação.
     def disponibilidade
       catraca = Catraca.find(params[:id])
-      catraca.update!(online: !catraca.online?)
+      catraca.update!(online: ActiveModel::Type::Boolean.new.cast(params.require(:online)))
 
       estado = catraca.online? ? "online" : "offline"
       redirect_to admin_restaurantes_path, notice: "#{catraca.identificacao} do #{catraca.restaurante.nome} está #{estado}"
