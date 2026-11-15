@@ -21,6 +21,33 @@ class TipoRefeicao < ApplicationRecord
   # Janelas geradas para o horário antigo ficariam fora do turno: o admin gera de novo.
   after_update :descartar_time_frames, if: -> { saved_change_to_hora_inicio? || saved_change_to_hora_fim? }
 
+  def self.vigente_em(agora = Time.current)
+    momento = agora.in_time_zone
+    data = momento.to_date
+    all.detect do |tipo|
+      inicio = horario_na_data(data, tipo.hora_inicio)
+      fim = horario_na_data(data, tipo.hora_fim)
+      momento.between?(inicio, fim)
+    end
+  end
+
+  def self.horario_na_data(data, horario)
+    hora, minuto = if horario.respond_to?(:hour)
+      [ horario.hour, horario.min ]
+    else
+      horario.to_s.split(":").map(&:to_i)
+    end
+    Time.zone.local(data.year, data.month, data.day, hora, minuto, 0)
+  end
+
+  def hora_inicio_formatada
+    formatar_horario(hora_inicio)
+  end
+
+  def hora_fim_formatada
+    formatar_horario(hora_fim)
+  end
+
   # Grava a configuração e, se a granularidade mudou, recria as janelas do turno.
   # Retorna false se for inválida. O save! valida uma vez só e, se falhar, desfaz a
   # transação e deixa os erros em errors.
@@ -48,6 +75,12 @@ class TipoRefeicao < ApplicationRecord
   end
 
   private
+
+  def formatar_horario(horario)
+    return horario.strftime("%H:%M") if horario.respond_to?(:strftime)
+
+    horario.to_s.slice(0, 5)
+  end
 
   def recriar_time_frames
     time_frames.destroy_all

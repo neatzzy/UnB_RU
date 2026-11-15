@@ -5,8 +5,42 @@
     %p.sobretitulo Portal do Estudante · Início
     %h1 Olá, #{current_user.nome.split.first}
 
-%section.card.painel
-  %p.painel__descricao
-    O cardápio do dia (US10) ainda está em construção. Enquanto isso, consulte o seu
-    = link_to "extrato de refeições", extrato_path
-    para acompanhar recargas e utilizações.
+.home-conteudo
+  .home-coluna-esquerda
+    %section.card.painel
+      %h2 Acesso Rápido
+      %p.painel__descricao
+        Consulte o seu
+        = link_to "extrato de refeições", extrato_path
+        para acompanhar recargas e utilizações.
+
+  .home-coluna-direita
+    %section.card.painel.painel-cardapio
+      .painel__cabecalho
+        %div
+          %h2 Cardápio
+          - if @restaurante
+            %p.painel__subtitulo #{@restaurante.nome} · #{l(@agora.to_date, format: :long)} (#{@agora.strftime("%H:%M")})
+        = form_with url: home_path, method: :get, local: true, class: "formulario-inline" do
+          - if Rails.env.local? && params[:data_hora].present?
+            = hidden_field_tag :data_hora, params[:data_hora]
+          - if @restaurantes.many?
+            = label_tag :restaurante_id, "Restaurante", class: "sr-only"
+            = select_tag :restaurante_id, options_from_collection_for_select(@restaurantes, :id, :nome, @restaurante&.id), class: "campo__controle"
+          = submit_tag "Atualizar Cardápio", class: "botao botao--primario"
+
+      - if @refeicao_atual
+        %p.cardapio-linha-status Refeição em serviço
+        %h3.cardapio-linha-titulo Cardápio Oficial do #{@turno_atual.nome}
+
+        .cardapio-opcoes-lista
+          - @refeicao_atual.opcoes_estruturadas.each do |opcao|
+            .cardapio-opcao-painel
+              %h4.cardapio-opcao-painel__titulo= opcao[:titulo]
+              - opcao[:linhas].each do |categoria, alimento|
+                %p.cardapio-opcao-painel__linha
+                  %strong #{categoria}:
+                  = alimento
+      - else
+        %p.cardapio-linha-status Nenhuma refeição em serviço
+        %p.painel__descricao Nenhum cardápio disponível

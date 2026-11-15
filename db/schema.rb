@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_15_023339) do
   create_table "campi", force: :cascade do |t|
     t.integer "universidade_id", null: false
     t.string "nome", null: false
@@ -128,6 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_120000) do
     t.text "opcao_vegetariana_estrita"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "itens_extras"
     t.index ["restaurante_id", "tipo_refeicao_id", "data"], name: "idx_on_restaurante_id_tipo_refeicao_id_data_f179edd038", unique: true
     t.index ["restaurante_id"], name: "index_refeicoes_on_restaurante_id"
     t.index ["tipo_refeicao_id"], name: "index_refeicoes_on_tipo_refeicao_id"

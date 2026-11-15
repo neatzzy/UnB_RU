@@ -80,11 +80,17 @@ restaurantes.each do |restaurante|
       tipo = tipos[chave_refeicao] or next
       prefixo = chave_refeicao == "cafe_da_manha" ? "complemento" : "prato_principal"
 
-      restaurante.refeicoes.find_or_create_by!(tipo_refeicao: tipo, data: inicio_da_semana + deslocamento) do |r|
-        r.opcao_normal = pratos["#{prefixo}_padrao"]
-        r.opcao_ovolactovegetariana = pratos["#{prefixo}_ovolactovegetariano"]
-        r.opcao_vegetariana_estrita = pratos["#{prefixo}_vegetariano_estrito"]
-      end
+      refeicao = restaurante.refeicoes.find_or_initialize_by(
+        tipo_refeicao: tipo,
+        data: inicio_da_semana + deslocamento
+      )
+      refeicao.assign_attributes(
+        opcao_normal: pratos["#{prefixo}_padrao"],
+        opcao_ovolactovegetariana: pratos["#{prefixo}_ovolactovegetariano"],
+        opcao_vegetariana_estrita: pratos["#{prefixo}_vegetariano_estrito"],
+        itens_extras: pratos
+      )
+      refeicao.save!
     end
   end
 end

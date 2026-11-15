@@ -8,3 +8,58 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.home-conteudo {
+  display: grid;
+  grid-template-columns: 1fr minmax(340px, 500px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.home-coluna-direita {
+  grid-column: 2;
+}
+
+.cardapio-linha-status {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.cardapio-linha-titulo {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.cardapio-opcoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cardapio-opcao-painel {
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+.cardapio-opcao-painel__titulo {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.cardapio-opcao-painel__linha {
+  margin: 0.3rem 0;
+  line-height: 1.4;
+}
+
+@media (max-width: 820px) {
+  .home-conteudo {
+    grid-template-columns: 1fr;
+  }
+
+  .home-coluna-direita {
+    grid-column: 1;
+  }
+}
