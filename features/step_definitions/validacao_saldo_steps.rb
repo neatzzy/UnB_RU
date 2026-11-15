@@ -84,12 +84,12 @@ When("o funcionário tenta validar o QR Code do estudante") do
   click_button "Validar"
 end
 
-Then(/^ele deve ver um painel intitulado "([^:]+):\s*([^"]+)"$/) do |_titulo, numero_catraca|
-  expect(page).to have_content(/Catraca\s+0?#{Regexp.escape(numero_catraca)}/i)
+Then("ele deve ver um painel intitulado {string}") do |titulo|
+  within(".contexto-operacao") { expect(page).to have_css("h2", text: titulo) }
 end
 
-Then("uma seção intitulada {string}") do |_secao|
-  expect(page).to have_content("Leitura de QR Code")
+Then("uma seção intitulada {string}") do |secao|
+  expect(page).to have_css(".painel h2", text: secao)
 end
 
 Then("o acesso da catraca para o restaurante deve ser bloqueado por {string}") do |motivo|

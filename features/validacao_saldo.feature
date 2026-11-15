@@ -9,8 +9,8 @@ Funcionalidade: Catraca verifica o saldo do estudante antes de deixá-lo entrar
     E ele está operando a catraca "4"
     E ele está na página de "Validação"
     E existe um aluno cadastrado com matrícula "211048992" e QR Code "QR123"
-    Então ele deve ver um painel intitulado "Catraca Atual: 4"
-    E uma seção intitulada "Leitura Ótica do QR code"
+    Então ele deve ver um painel intitulado "Catraca 04"
+    E uma seção intitulada "Leitura de QR Code"
 
   Cenário: QR code analisado tem saldo insuficiente (caminho triste)
     Dado que o aluno possui saldo de R$ "2,00"
