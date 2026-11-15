@@ -13,4 +13,12 @@ module TurnosHelper
     "Mudar o horário apaga #{pluralize(janelas, 'janela', plural: 'janelas')} do FastPass deste turno. " \
       "Depois será preciso gerar as janelas de novo."
   end
+
+  # Salvar Configuração com outra granularidade recria as janelas (TipoRefeicao#configurar_time_frames).
+  # Retorna nil enquanto nenhum turno tem janelas e não há o que perder.
+  def aviso_de_reconfiguracao(turnos)
+    return unless turnos.any? { |turno| turno.time_frames.any? }
+
+    "Se a granularidade mudar, as janelas do turno escolhido serão apagadas e geradas de novo. Deseja continuar?"
+  end
 end
