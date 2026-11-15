@@ -28,6 +28,8 @@ Rails.application.routes.draw do
     resources :catracas, except: %i[index show] do
       patch :disponibilidade, on: :member
     end
+    get "relatorio", to: "relatorios#show", as: :relatorio
+    get "relatorio/exportar", to: "relatorios#exportar", as: :exportar_relatorio
     resources :turnos, only: %i[index edit update] do
       patch :configurar_time_frames, on: :collection
     end
