@@ -26,11 +26,29 @@ RSpec.describe "Relatório global de acessos", type: :request do
       expect(response.body).not_to include(aluno.matricula)
     end
 
-    it "oferece só as catracas do restaurante filtrado" do
-      Restaurante.create!(nome: "RU Gama", numero_de_pisos: 1).catracas.create!(numero: 7, piso: 1)
+    # O seletor é filtrado no navegador; a página precisa trazer as catracas de todos os
+    # restaurantes para o administrador poder trocar de unidade sem filtrar de novo.
+    it "mantém as catracas de todos os restaurantes no seletor, agrupadas por unidade" do
+      gama = Restaurante.create!(nome: "RU Gama", numero_de_pisos: 1)
+      gama.catracas.create!(numero: 7, piso: 1)
       get admin_relatorio_path, params: { restaurante_id: darcy.id }
-      expect(response.body).to include("Catraca 04")
-      expect(response.body).not_to include("Catraca 07")
+      expect(response.body).to include("Catraca 04", "Catraca 07")
+      expect(response.body).to include(%(data-restaurante-id="#{darcy.id}"), %(data-restaurante-id="#{gama.id}"))
+    end
+
+    it "pagina os acessos na tela sem alterar os totais" do
+      stub_const("RelatorioGlobal::POR_PAGINA", 2)
+      2.times do |i|
+        HistoricoCatraca.create!(catraca: catraca, aluno: criar_usuario, data_hora: Time.zone.parse("2026-10-16 12:0#{i}"),
+                                 status: "Liberado", modo_validacao: "Comum", tarifa: 4.5)
+      end
+
+      get admin_relatorio_path
+      expect(response.body).to include("Exibindo 1-2 de 3 acessos", "Página 1 de 2", "R$ 13,50")
+      expect(response.body).not_to include(aluno.matricula)
+
+      get admin_relatorio_path, params: { pagina: 2 }
+      expect(response.body).to include("Exibindo 3-3 de 3 acessos", aluno.matricula, "R$ 13,50")
     end
 
     it "exporta o PDF com os filtros aplicados" do

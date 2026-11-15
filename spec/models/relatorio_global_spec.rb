@@ -57,8 +57,21 @@ RSpec.describe RelatorioGlobal, type: :model do
     expect(RelatorioGlobal.new.acessos.map { |a| a.data_hora.strftime("%H:%M") }).to eq(%w[19:02 12:20 12:18 12:05])
   end
 
+  it "pagina a tela e mantém todos os acessos para o PDF" do
+    stub_const("RelatorioGlobal::POR_PAGINA", 3)
+    relatorio = RelatorioGlobal.new(pagina: 2)
+    expect(relatorio.acessos_da_pagina.map { |a| a.data_hora.strftime("%H:%M") }).to eq(%w[12:05])
+    expect(relatorio.acessos.to_a.size).to eq(4)
+    expect([ relatorio.total_paginas, relatorio.primeiro_da_pagina, relatorio.ultimo_da_pagina ]).to eq([ 2, 4, 4 ])
+  end
+
+  it "volta para a última página quando a pedida não existe" do
+    expect(RelatorioGlobal.new(pagina: 99).pagina_atual).to eq(1)
+    expect(RelatorioGlobal.new(pagina: 0).pagina_atual).to eq(1)
+  end
+
   it "repassa só os filtros preenchidos" do
-    expect(RelatorioGlobal.new(restaurante_id: "3", data_inicial: "01/10/2026").parametros)
+    expect(RelatorioGlobal.new(restaurante_id: "3", data_inicial: "01/10/2026", pagina: "2").parametros)
       .to eq("restaurante_id" => "3", "data_inicial" => "2026-10-01")
   end
 end
