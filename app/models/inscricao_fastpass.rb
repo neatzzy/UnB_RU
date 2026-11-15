@@ -33,6 +33,12 @@ class InscricaoFastpass < ApplicationRecord
     Time.current >= inicio_do_turno - ANTECEDENCIA_DO_RESULTADO
   end
 
+  # O aluno só cancela antes do sorteio e antes de o resultado ser divulgado.
+  # A view e o controller usam a mesma regra.
+  def cancelavel?
+    inscrito? && !resultado_liberado?
+  end
+
   private
 
   # A regra é uma inscrição por turno (Almoço, Jantar) no dia, e não por janela.

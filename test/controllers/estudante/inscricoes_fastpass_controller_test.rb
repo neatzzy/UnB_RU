@@ -74,12 +74,25 @@ class Estudante::InscricoesFastpassControllerTest < ActionDispatch::IntegrationT
     entrar_como @aluno
     inscricao = @aluno.inscricoes_fastpass.create!(time_frame: @janela, data: Date.current)
 
+    # Antes das 10:00: o Almoço começa às 11:00 e o resultado sai 1 hora antes.
     assert_difference("InscricaoFastpass.count", -1) do
-      delete fastpass_inscricao_path(inscricao)
+      travel_to(hoje_as(9, 30)) { delete fastpass_inscricao_path(inscricao) }
     end
 
     assert_redirected_to fastpass_path
     assert_equal "Inscrição cancelada", flash[:notice]
+  end
+
+  test "não cancela na última hora antes do turno, mesmo sem o botão na tela" do
+    entrar_como @aluno
+    inscricao = @aluno.inscricoes_fastpass.create!(time_frame: @janela, data: Date.current)
+
+    assert_no_difference("InscricaoFastpass.count") do
+      travel_to(hoje_as(10, 30)) { delete fastpass_inscricao_path(inscricao) }
+    end
+
+    assert_redirected_to fastpass_path
+    assert_match "sorteio já foi realizado", flash[:alert]
   end
 
   test "não cancela a inscrição de outro aluno" do
@@ -105,5 +118,11 @@ class Estudante::InscricoesFastpassControllerTest < ActionDispatch::IntegrationT
     assert_redirected_to fastpass_path
     assert_match "sorteio já foi realizado", flash[:alert]
     assert inscricao.reload.contemplado?
+  end
+
+  private
+
+  def hoje_as(hora, minuto)
+    Time.zone.today.in_time_zone.change(hour: hora, min: minuto)
   end
 end

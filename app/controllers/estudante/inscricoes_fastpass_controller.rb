@@ -16,12 +16,13 @@ module Estudante
     end
 
     # Busca só entre as inscrições do aluno logado: a de outro aluno dá 404.
-    # Depois do sorteio o resultado fica valendo. A regra fica aqui, e não no model,
+    # Depois do sorteio, ou na última hora antes do turno, o resultado fica valendo
+    # (InscricaoFastpass#cancelavel?). A regra fica aqui, e não num callback do model,
     # para não travar o descarte em cascata quando o admin muda o horário do turno.
     def destroy
       inscricao = current_user.inscricoes_fastpass.find(params[:id])
 
-      if inscricao.inscrito?
+      if inscricao.cancelavel?
         inscricao.destroy!
         redirect_to fastpass_path, notice: "Inscrição cancelada"
       else
