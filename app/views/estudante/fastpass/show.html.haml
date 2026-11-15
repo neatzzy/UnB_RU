@@ -6,7 +6,7 @@
     %h1 Sorteio FastPass
 
 - if @resultados.any?
-  %section#painel-resultado-fastpass.card.painel
+  %section#painel-resultado-fastpass.card.painel{role: "status"}
     %h2.painel__titulo Resultado do FastPass
     %ul.resultados-fastpass
       - @resultados.each do |inscricao|
@@ -35,7 +35,7 @@
       -# Na última hora o resultado já está no painel e o botão de cancelar some.
       - unless inscricao.resultado_liberado?
         %p.painel__nota O Sorteio do FastPass ainda não aconteceu. Volte mais tarde.
-        - if inscricao.inscrito?
+        - if inscricao.cancelavel?
           = button_to "Cancelar inscrição", fastpass_inscricao_path(inscricao), method: :delete,
                       class: "botao botao--secundario",
                       form: { data: { turbo_confirm: "Cancelar a inscrição no sorteio do #{turno.nome}?" } }
