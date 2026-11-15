@@ -14,22 +14,40 @@ restaurantes = {
   Restaurante.find_or_create_by!(campus: campus) { |r| r.nome = nome_restaurante }
 end
 
-puts "Semeando catracas..."
+puts "Semeando catracas (online, para o terminal operacional funcionar)..."
+# A coluna `online` nasce false na migration, então sem isto nenhuma catraca
+# fica selecionável no ponto de acesso e o terminal só funciona nos testes.
+# Só vale na criação: a disponibilidade de uma catraca já cadastrada é da
+# administração do restaurante (#8), e o seed não desfaz o que o admin mudou.
 restaurantes.each_with_index do |restaurante, indice|
   pisos = indice.zero? ? [ 1, 1, 2, 2 ] : [ 1, 1 ]
   restaurante.update!(numero_de_pisos: pisos.max) if restaurante.numero_de_pisos < pisos.max
   pisos.each_with_index do |piso, i|
-    restaurante.catracas.find_or_create_by!(numero: i + 1) { |c| c.piso = piso }
+    restaurante.catracas.find_or_create_by!(numero: i + 1) do |c|
+      c.piso = piso
+      c.online = true
+    end
   end
 end
 
 puts "Semeando tipos de refeição..."
+# A tarifa é por turno: o café da manhã é mais barato que almoço e jantar,
+# como o histórico do aluno de exemplo mais abaixo já mostrava.
 tipos = {
-  "cafe_da_manha" => [ "Café da manhã", "07:00", "09:30" ],
-  "almoco" => [ "Almoço", "11:00", "14:30" ],
-  "jantar" => [ "Jantar", "17:00", "19:30" ]
-}.to_h do |chave, (nome, inicio, fim)|
-  [ chave, TipoRefeicao.find_or_create_by!(nome: nome) { |t| t.hora_inicio = inicio; t.hora_fim = fim } ]
+  "cafe_da_manha" => [ "Café da manhã", "07:00", "09:30", "2.50" ],
+  "almoco" => [ "Almoço", "11:00", "14:30", "4.50" ],
+  "jantar" => [ "Jantar", "17:00", "19:30", "4.50" ]
+}.to_h do |chave, (nome, inicio, fim, tarifa)|
+  # Os horários entram só na criação. Reatribuí-los a cada db:seed disparava o
+  # after_update :descartar_time_frames do turno, que apaga as janelas e, em
+  # cascata, as inscrições do FastPass — e ainda desfazia o horário do admin.
+  tipo = TipoRefeicao.find_or_create_by!(nome: nome) do |t|
+    t.hora_inicio = inicio
+    t.hora_fim = fim
+    t.tarifa = tarifa
+  end
+  tipo.update!(tarifa: tarifa) if tipo.tarifa != BigDecimal(tarifa)
+  [ chave, tipo ]
 end
 
 puts "Semeando time-frames do FastPass (janelas de 15 min, tolerância de 3 min)..."
@@ -88,5 +106,6 @@ if aluno.transacoes.none?
 end
 
 puts "Pronto: #{Universidade.count} universidade, #{Campus.count} campi, #{Restaurante.count} restaurantes, " \
-     "#{Catraca.count} catracas, #{TipoRefeicao.count} tipos de refeição, #{TimeFrame.count} time-frames, " \
-     "#{Refeicao.count} refeições, #{User.count} usuários."
+     "#{Catraca.count} catracas (#{Catraca.where(online: true).count} online), " \
+     "#{TipoRefeicao.count} tipos de refeição, #{TimeFrame.count} time-frames, " \
+     "#{Refeicao.count} refeições, #{InscricaoFastpass.count} inscrições no FastPass, #{User.count} usuários."

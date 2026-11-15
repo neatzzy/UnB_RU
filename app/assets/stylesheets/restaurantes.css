@@ -84,7 +84,7 @@
 
 .restaurante__catracas {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
   gap: 0.625rem;
 }
 
@@ -111,4 +111,22 @@
 .etiqueta--bloqueado {
   color: var(--cor-erro);
   background: var(--cor-erro-fundo);
+}
+
+.catraca__info,
+.catraca__acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catraca .etiqueta--neutra {
+  background: var(--cor-superficie);
+}
+
+.campo-caixa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
 }
