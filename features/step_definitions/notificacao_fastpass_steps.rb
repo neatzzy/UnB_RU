@@ -3,7 +3,7 @@
 # O início do turno é montado com a data de hoje: a coluna hora_inicio vem com a
 # data 2000-01-01, e viajar para ela levaria o relógio para fora do dia da inscrição.
 Given("ele se inscreveu no FastPass para a próxima refeição") do
-  turno = TipoRefeicao.create!(nome: "Almoço", hora_inicio: "12:00", hora_fim: "14:00")
+  turno = TipoRefeicao.find_or_create_by!(nome: "Almoço") { |t| t.hora_inicio = "12:00"; t.hora_fim = "14:00" }
   janela = turno.time_frames.create!(inicio: "12:00", fim: "12:15")
   @inscricao = InscricaoFastpass.create!(aluno: @estudante, time_frame: janela, data: Date.current)
   @inicio_do_turno = Time.zone.parse(turno.hora_inicio.strftime("%H:%M"))
