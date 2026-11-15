@@ -1,6 +1,8 @@
 module Estudante
   # Inscrição do aluno logado em uma janela do FastPass (US13).
   class InscricoesFastpassController < BaseController
+    before_action :exigir_aluno
+
     def create
       time_frame = TimeFrame.find_by(id: params[:time_frame_id])
       return redirect_to(fastpass_path, alert: "Escolha um horário") unless time_frame
