@@ -6,6 +6,8 @@ class TipoRefeicao < ApplicationRecord
 
   has_many :refeicoes, dependent: :restrict_with_error
   has_many :time_frames, -> { order(:inicio) }, dependent: :destroy
+  # Inscrições que somem junto quando as janelas do turno são apagadas.
+  has_many :inscricoes_fastpass, through: :time_frames
 
   validates :nome, presence: true, uniqueness: true
   validates :hora_inicio, :hora_fim, presence: true, unless: :horario_invalido?

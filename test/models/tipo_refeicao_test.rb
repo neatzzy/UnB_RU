@@ -26,6 +26,14 @@ class TipoRefeicaoTest < ActiveSupport::TestCase
     assert_equal 5, @almoco.reload.tolerancia_minutos
   end
 
+  test "reenviar a mesma granularidade não apaga as inscrições dos alunos" do
+    @almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
+    users(:genaina).inscricoes_fastpass.create!(time_frame: @almoco.time_frames.first, data: Date.current)
+
+    assert @almoco.configurar_time_frames(granularidade: "15", tolerancia: "5")
+    assert_equal 1, @almoco.inscricoes_fastpass.count
+  end
+
   test "mudar a granularidade recria as janelas" do
     @almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
 
