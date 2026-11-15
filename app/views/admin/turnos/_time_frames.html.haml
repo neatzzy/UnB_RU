@@ -10,7 +10,8 @@
         - turno.errors.full_messages.each do |mensagem|
           %li= mensagem
 
-  = form_with model: turno, scope: :configuracao, url: configurar_time_frames_admin_turnos_path, method: :patch, class: "formulario" do |f|
+  = form_with model: turno, scope: :configuracao, url: configurar_time_frames_admin_turnos_path, method: :patch, class: "formulario",
+              data: { turbo_confirm: aviso_de_reconfiguracao(turnos) } do |f|
     .campo
       .campo__cabecalho
         = f.label :id, "Turno de Referência"

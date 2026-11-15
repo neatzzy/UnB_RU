@@ -18,23 +18,25 @@ class TipoRefeicao < ApplicationRecord
   # Janelas geradas para o horário antigo ficariam fora do turno: o admin gera de novo.
   after_update :descartar_time_frames, if: -> { saved_change_to_hora_inicio? || saved_change_to_hora_fim? }
 
-  # Grava a configuração e recria as janelas do turno. Retorna false se for inválida.
-  # O save! valida uma vez só e, se falhar, desfaz a transação e deixa os erros em errors.
+  # Grava a configuração e, se a granularidade mudou, recria as janelas do turno.
+  # Retorna false se for inválida. O save! valida uma vez só e, se falhar, desfaz a
+  # transação e deixa os erros em errors.
   def configurar_time_frames(granularidade:, tolerancia:)
     self.granularidade_minutos = granularidade
     self.tolerancia_minutos = tolerancia
+    # Com a mesma granularidade as janelas atuais continuam valendo: só a tolerância muda.
+    recriar = granularidade_minutos_changed? || time_frames.empty?
 
     transaction do
       save!(context: :configuracao_time_frames)
-      time_frames.destroy_all
-      quantidade = duracao_em_minutos / granularidade_minutos
-      quantidade.times do |i|
-        time_frames.create!(inicio: hora_inicio + (i * granularidade_minutos).minutes,
-                            fim: hora_inicio + ((i + 1) * granularidade_minutos).minutes)
-      end
+      recriar_time_frames if recriar
     end
     true
-  rescue ActiveRecord::RecordInvalid
+  rescue ActiveRecord::RecordInvalid => e
+    # Só o erro do próprio turno tem mensagem para o admin. Se uma janela falhar,
+    # o erro sobe em vez de virar um "não foi possível" sem explicação.
+    raise unless e.record == self
+
     false
   end
 
@@ -44,8 +46,19 @@ class TipoRefeicao < ApplicationRecord
 
   private
 
+  def recriar_time_frames
+    time_frames.destroy_all
+    quantidade = duracao_em_minutos / granularidade_minutos
+    quantidade.times do |i|
+      time_frames.create!(inicio: hora_inicio + (i * granularidade_minutos).minutes,
+                          fim: hora_inicio + ((i + 1) * granularidade_minutos).minutes)
+    end
+  end
+
+  # Sem janelas, a configuração antiga deixa de valer e o admin configura de novo.
   def descartar_time_frames
     time_frames.destroy_all
+    update_columns(granularidade_minutos: nil, tolerancia_minutos: nil)
   end
 
   def granularidade_valida
@@ -81,6 +94,8 @@ class TipoRefeicao < ApplicationRecord
 
   # Dois intervalos se sobrepõem quando um começa antes de o outro terminar e vice-versa.
   # A comparação é feita pelo banco, que devolve só o primeiro turno em conflito.
+  # O return if errors.any? pula a consulta quando o horário já é inválido. Por isso
+  # esta validação depende da ordem: precisa ser declarada depois das de horário.
   def sem_sobreposicao
     return if errors.any?
 
