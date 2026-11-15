@@ -8,7 +8,10 @@ module Estudante
       return redirect_to(fastpass_path, alert: "Escolha um horário") unless time_frame
 
       inscricao = current_user.inscricoes_fastpass.new(time_frame: time_frame, data: Date.current)
-      if salvar(inscricao)
+      # Na última hora o resultado já saiu: quem se inscrevesse agora não poderia cancelar.
+      if inscricao.resultado_liberado?
+        redirect_to fastpass_path, alert: "As inscrições para o #{time_frame.tipo_refeicao.nome} de hoje já foram encerradas"
+      elsif salvar(inscricao)
         redirect_to fastpass_path, notice: "Inscrição no sorteio realizada com sucesso"
       else
         redirect_to fastpass_path, alert: inscricao.errors.full_messages.to_sentence

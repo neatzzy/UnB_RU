@@ -41,6 +41,17 @@ class Estudante::FastpassControllerTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Cancelar inscrição", count: 0
   end
 
+  test "sem inscrição, mostra o formulário antes e as inscrições encerradas na última hora" do
+    @inscricao.destroy!
+
+    travel_to(hoje_as(10, 30)) { get fastpass_path }
+    assert_select "button", text: "Confirmar Inscrição"
+
+    travel_to(hoje_as(11, 30)) { get fastpass_path }
+    assert_select ".secao-turno", text: /As inscrições para o Almoço de hoje já foram encerradas/
+    assert_select "button", text: "Confirmar Inscrição", count: 0
+  end
+
   private
 
   def hoje_as(hora, minuto)

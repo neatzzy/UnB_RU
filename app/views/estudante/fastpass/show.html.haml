@@ -39,6 +39,8 @@
           = button_to "Cancelar inscrição", fastpass_inscricao_path(inscricao), method: :delete,
                       class: "botao botao--secundario",
                       form: { data: { turbo_confirm: "Cancelar a inscrição no sorteio do #{turno.nome}?" } }
+    - elsif InscricaoFastpass.resultado_liberado?(turno, Date.current)
+      %p.painel__nota As inscrições para o #{turno.nome} de hoje já foram encerradas.
     - else
       = form_with url: fastpass_inscricoes_path, class: "formulario" do |f|
         %ul.grade-time-frames
