@@ -23,4 +23,12 @@ RSpec.describe TipoRefeicao, type: :model do
       expect(described_class.vigente_em(Time.zone.parse("2026-11-16 15:45:00"))).to be_nil
     end
   end
+
+  describe "#hora_inicio_formatada e #hora_fim_formatada" do
+    it "retorna apenas horas e minutos no formato HH:MM" do
+      cafe.reload
+      expect(cafe.hora_inicio_formatada).to eq("07:00")
+      expect(cafe.hora_fim_formatada).to eq("09:30")
+    end
+  end
 end

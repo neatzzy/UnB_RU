@@ -31,15 +31,15 @@ class Refeicao < ApplicationRecord
     [
       {
         titulo: "Opção padrão",
-        linhas: [ [ rotulo_principal, opcao_normal.presence || "Não informado" ] ] + extras
+        linhas: [ [ rotulo_principal, normalizar_texto(opcao_normal.presence || "Não informado") ] ] + extras
       },
       {
         titulo: "Opção ovolactovegetariana",
-        linhas: [ [ rotulo_principal, opcao_ovolactovegetariana.presence || "Não informado" ] ] + extras
+        linhas: [ [ rotulo_principal, normalizar_texto(opcao_ovolactovegetariana.presence || "Não informado") ] ] + extras
       },
       {
         titulo: "Opção vegetariana estrita",
-        linhas: [ [ rotulo_principal, opcao_vegetariana_estrita.presence || "Não informado" ] ] + extras
+        linhas: [ [ rotulo_principal, normalizar_texto(opcao_vegetariana_estrita.presence || "Não informado") ] ] + extras
       }
     ]
   end
@@ -54,7 +54,13 @@ class Refeicao < ApplicationRecord
       next if valor.blank?
 
       texto = valor.is_a?(Array) ? valor.join(" · ") : valor.to_s
-      [ rotulo, texto ]
+      [ rotulo, normalizar_texto(texto) ]
     end
+  end
+
+  private
+
+  def normalizar_texto(texto)
+    texto.to_s.gsub(/\bOU\b/, "ou")
   end
 end
