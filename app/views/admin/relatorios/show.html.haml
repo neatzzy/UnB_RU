@@ -91,7 +91,7 @@
             %th Status
             %th.tabela__numerico Valor
         %tbody
-          - @relatorio.acessos.each do |acesso|
+          - @relatorio.acessos_da_pagina.each do |acesso|
             %tr
               %td= l(acesso.data_hora)
               %td= acesso.catraca.restaurante.nome
@@ -101,3 +101,15 @@
               %td
                 %span.etiqueta{class: acesso.status == "Liberado" ? "etiqueta--sucesso" : "etiqueta--bloqueado"}= acesso.status
               %td.tabela__numerico= number_to_currency(acesso.tarifa)
+    .paginacao
+      %span.paginacao__resumo
+        Exibindo #{@relatorio.primeiro_da_pagina}-#{@relatorio.ultimo_da_pagina} de #{pluralize(@relatorio.total_acessos, "acesso")}
+      - if @relatorio.total_paginas > 1
+        %nav.paginacao__paginas{"aria-label": "Páginas do relatório"}
+          - if @relatorio.pagina_atual > 1
+            = link_to admin_relatorio_path(@relatorio.parametros.merge(pagina: @relatorio.pagina_atual - 1)), class: "paginacao__pagina", "aria-label": "Página anterior" do
+              = icon :chevron_left
+          %span.paginacao__pagina.ativa Página #{@relatorio.pagina_atual} de #{@relatorio.total_paginas}
+          - if @relatorio.pagina_atual < @relatorio.total_paginas
+            = link_to admin_relatorio_path(@relatorio.parametros.merge(pagina: @relatorio.pagina_atual + 1)), class: "paginacao__pagina", "aria-label": "Próxima página" do
+              = icon :chevron_right

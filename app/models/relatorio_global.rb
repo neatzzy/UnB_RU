@@ -7,26 +7,45 @@ class RelatorioGlobal
   attribute :catraca_id, :integer
   attribute :data_inicial, :date
   attribute :data_final, :date
+  attribute :pagina, :integer, default: 1
+
+  POR_PAGINA = 50
 
   validate :periodo_em_ordem
 
   Consolidacao = Struct.new(:restaurante, :acessos, :liberados, :fastpass, :arrecadacao)
 
+  # Todos os acessos dos filtros: base dos totais e do PDF, que é o documento de auditoria.
   def acessos
     @acessos ||= consultar
   end
 
-  def total_acessos = acessos.size
+  # A tela mostra uma página por vez; o histórico cresce a cada leitura de catraca.
+  def acessos_da_pagina
+    acessos.offset((pagina_atual - 1) * POR_PAGINA).limit(POR_PAGINA)
+  end
+
+  def pagina_atual = (pagina || 1).clamp(1, total_paginas)
+  def total_paginas = [ (total_acessos.to_f / POR_PAGINA).ceil, 1 ].max
+  def primeiro_da_pagina = total_acessos.zero? ? 0 : (pagina_atual - 1) * POR_PAGINA + 1
+  def ultimo_da_pagina = [ pagina_atual * POR_PAGINA, total_acessos ].min
+
+  def total_acessos = @total_acessos ||= acessos.count
   def refeicoes_servidas = acessos.liberados.count
   def acessos_fastpass = acessos.fastpass.count
   def arrecadacao = acessos.liberados.sum(:tarifa)
 
+  # Somada no banco, sem carregar os acessos em memória.
   def consolidacao
-    por_restaurante = acessos.group_by { |acesso| acesso.catraca.restaurante }
-    por_restaurante.sort_by { |restaurante, _| restaurante.nome }.map do |restaurante, lista|
-      liberados = lista.select { |acesso| acesso.status == "Liberado" }
-      fastpass = lista.count { |acesso| acesso.modo_validacao == "FastPass" }
-      Consolidacao.new(restaurante, lista.size, liberados.size, fastpass, liberados.sum(&:tarifa))
+    por_restaurante = acessos.unscope(:order, :includes).group("catracas.restaurante_id")
+    total = por_restaurante.count
+    liberados = por_restaurante.liberados.count
+    fastpass = por_restaurante.fastpass.count
+    arrecadado = por_restaurante.liberados.sum(:tarifa)
+
+    Restaurante.where(id: total.keys).order(:nome).map do |restaurante|
+      id = restaurante.id
+      Consolidacao.new(restaurante, total[id], liberados.fetch(id, 0), fastpass.fetch(id, 0), arrecadado.fetch(id, 0))
     end
   end
 
@@ -35,7 +54,7 @@ class RelatorioGlobal
 
   # Para repassar os filtros da tela ao botão de exportação.
   def parametros
-    attributes.compact.transform_values(&:to_s)
+    attributes.except("pagina").compact.transform_values(&:to_s)
   end
 
   private

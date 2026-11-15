@@ -21,7 +21,7 @@ module Admin
     private
 
     def filtros
-      params.permit(:restaurante_id, :catraca_id, :data_inicial, :data_final).to_h.compact_blank
+      params.permit(:restaurante_id, :catraca_id, :data_inicial, :data_final, :pagina).to_h.compact_blank
     end
   end
 end
