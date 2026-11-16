@@ -24,6 +24,33 @@ RSpec.describe TipoRefeicao, type: :model do
     end
   end
 
+  # Os horários ficam gravados em UTC na data 2000-01-01; depois das 22:00 eles passam
+  # da meia-noite em UTC, o caso da issue #39.
+  describe "sobreposição de turnos" do
+    it "recusa turnos sobrepostos depois das 22:00" do
+      jantar.update!(hora_inicio: "22:00", hora_fim: "23:00")
+      cafe.assign_attributes(hora_inicio: "22:30", hora_fim: "23:30")
+
+      expect(cafe).not_to be_valid
+      expect(cafe.errors[:base]).to include("O horário do Café da manhã se sobrepõe ao turno Jantar")
+    end
+
+    it "aceita um turno que começa quando o outro termina" do
+      jantar.update!(hora_inicio: "22:00", hora_fim: "23:00")
+      cafe.assign_attributes(hora_inicio: "23:00", hora_fim: "23:30")
+
+      expect(cafe).to be_valid
+    end
+  end
+
+  describe ".em_ordem" do
+    it "ordena pela hora local, mesmo com turno depois das 22:00" do
+      jantar.update!(hora_inicio: "22:00", hora_fim: "23:00")
+
+      expect(described_class.em_ordem).to eq([ cafe, almoco, jantar ])
+    end
+  end
+
   describe "#hora_inicio_formatada e #hora_fim_formatada" do
     it "retorna apenas horas e minutos no formato HH:MM" do
       cafe.reload
