@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: RuboCop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Rodar RuboCop
+        run: bundle exec rubocop --parallel
+
+  tests:
+    name: RSpec + Cucumber
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Preparar banco de dados
+        run: bin/rails db:prepare
+
+      - name: Rodar RSpec
+        run: bundle exec rspec
+
+      - name: Rodar Cucumber
+        run: bundle exec cucumber --format progress
