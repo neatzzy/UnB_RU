@@ -40,7 +40,7 @@ module Admin
     # Consulta nova ao banco: a lista mostra sempre os horários salvos, mesmo
     # quando o turno em edição tem valores inválidos ainda não gravados.
     def carregar_turnos
-      @turnos = TipoRefeicao.order(:hora_inicio).includes(:time_frames)
+      @turnos = TipoRefeicao.includes(:time_frames).em_ordem
     end
 
     def carregar_turno_em_edicao
