@@ -20,7 +20,5 @@ class RegraFastpass
     nil
   end
 
-  def self.horario_na_data(data, hora)
-    Time.zone.local(data.year, data.month, data.day, hora.hour, hora.min, hora.sec)
-  end
+  def self.horario_na_data(data, hora) = TipoRefeicao.horario_na_data(data, hora)
 end
