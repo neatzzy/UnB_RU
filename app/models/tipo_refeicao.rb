@@ -21,6 +21,10 @@ class TipoRefeicao < ApplicationRecord
   # Janelas geradas para o horário antigo ficariam fora do turno: o admin gera de novo.
   after_update :descartar_time_frames, if: -> { saved_change_to_hora_inicio? || saved_change_to_hora_fim? }
 
+  # Ordena pela hora local. O ORDER BY do banco usa os horários em UTC, e um turno
+  # depois das 22:00 passa da meia-noite e vai para o começo da lista (#39).
+  def self.em_ordem = all.sort_by { |turno| turno.hora_inicio.strftime("%H:%M") }
+
   def self.vigente_em(agora = Time.current)
     momento = agora.in_time_zone
     data = momento.to_date
@@ -125,15 +129,17 @@ class TipoRefeicao < ApplicationRecord
   end
 
   # Dois intervalos se sobrepõem quando um começa antes de o outro terminar e vice-versa.
-  # A comparação é feita pelo banco, que devolve só o primeiro turno em conflito.
-  # O return if errors.any? pula a consulta quando o horário já é inválido. Por isso
+  # A comparação é feita em Ruby pela hora local, e não pelo banco: em UTC os turnos
+  # depois das 22:00 passam da meia-noite e a comparação falha (#39).
+  # O return if errors.any? pula a busca quando o horário já é inválido. Por isso
   # esta validação depende da ordem: precisa ser declarada depois das de horário.
   def sem_sobreposicao
     return if errors.any?
 
-    outro = TipoRefeicao.where.not(id: id)
-                        .where("hora_inicio < ? AND hora_fim > ?", hora_fim, hora_inicio)
-                        .order(:hora_inicio).first
+    inicio, fim = hora_inicio.strftime("%H:%M"), hora_fim.strftime("%H:%M")
+    outro = TipoRefeicao.where.not(id: id).em_ordem.detect do |turno|
+      turno.hora_inicio.strftime("%H:%M") < fim && turno.hora_fim.strftime("%H:%M") > inicio
+    end
     errors.add(:base, :sobreposicao, turno: nome, outro: outro.nome) if outro
   end
 end

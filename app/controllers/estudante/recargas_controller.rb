@@ -48,7 +48,7 @@ module Estudante
     # O pacote é cobrado pela tarifa de referência; a lista de turnos deixa
     # visível que cada refeição tem seu próprio preço na catraca.
     def carregar_tarifas
-      @turnos = TipoRefeicao.order(:hora_inicio)
+      @turnos = TipoRefeicao.em_ordem
       @tarifa_referencia = TarifaRefeicao.referencia
     end
 

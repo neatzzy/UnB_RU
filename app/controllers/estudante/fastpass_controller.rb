@@ -5,8 +5,7 @@ module Estudante
     before_action :exigir_aluno
 
     def show
-      @turnos = TipoRefeicao.where(id: TimeFrame.select(:tipo_refeicao_id))
-                            .order(:hora_inicio).includes(:time_frames)
+      @turnos = TipoRefeicao.where(id: TimeFrame.select(:tipo_refeicao_id)).includes(:time_frames).em_ordem
       inscricoes = current_user.inscricoes_fastpass.where(data: Date.current)
                                .includes(time_frame: :tipo_refeicao).to_a
       @inscricoes = inscricoes.index_by { |inscricao| inscricao.time_frame.tipo_refeicao_id }
