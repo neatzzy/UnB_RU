@@ -19,10 +19,7 @@ class ValidacaoDeAcesso
         aluno&.lock!
         catraca.lock!
         matricula_esperada = aluno ? aluno.matricula : codigo
-        turno = TipoRefeicao.all.detect do |tipo|
-          agora.between?(RegraFastpass.horario_na_data(agora.to_date, tipo.hora_inicio),
-                         RegraFastpass.horario_na_data(agora.to_date, tipo.hora_fim))
-        end
+        turno = TipoRefeicao.vigente_em(agora)
         motivo = if !catraca.online?
           "Catraca offline"
         elsif !dispositivo.disponivel?

@@ -31,13 +31,9 @@ class TipoRefeicao < ApplicationRecord
     end
   end
 
+  # As colunas de horário guardam só a hora (com a data 2000-01-01); aqui ela vai para a data pedida.
   def self.horario_na_data(data, horario)
-    hora, minuto = if horario.respond_to?(:hour)
-      [ horario.hour, horario.min ]
-    else
-      horario.to_s.split(":").map(&:to_i)
-    end
-    Time.zone.local(data.year, data.month, data.day, hora, minuto, 0)
+    Time.zone.local(data.year, data.month, data.day, horario.hour, horario.min, horario.sec)
   end
 
   def hora_inicio_formatada
