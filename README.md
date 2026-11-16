@@ -20,7 +20,7 @@ modelo de dados em [`docs/entity-relationship-model.md`](docs/entity-relationshi
 - Ruby 3.4.10 (ver [`.ruby-version`](.ruby-version)) e Rails 8.1
 - SQLite como banco de dados
 - HAML para as views, Propshaft para os assets e Hotwire (Turbo e Stimulus)
-- Minitest, Cucumber e Capybara para os testes
+- RSpec, Minitest, Cucumber e Capybara para os testes
 - RuboCop (estilo omakase) e Brakeman para análise estática
 
 ## Como executar
@@ -56,19 +56,25 @@ A aplicação sobe em <http://localhost:3000>.
 O comando `bin/rails db:seed` é idempotente e cria a UnB com quatro campi e
 restaurantes (Darcy Ribeiro, Gama, Ceilândia e Planaltina), as catracas de cada
 um, os tipos de refeição com seus horários, o cardápio da semana atual a partir
-de [`cardapio.json`](cardapio.json) e três usuários, todos com a senha `senha123`:
+de [`cardapio.json`](cardapio.json) e cinco usuários, todos com a senha `senha123`:
 
-| Perfil | Matrícula |
-|---|---|
-| Administrador | `1000001` |
-| Funcionário | `1984201` |
-| Aluno | `2023123456` |
+| Perfil | Matrícula | Observação |
+|---|---|---|
+| Administrador | `1000001` | |
+| Funcionário | `1984201` | |
+| Aluno | `2023123456` | saldo de R$ 50,00 |
+| Aluno | `26100001` | sem saldo, QR Code `QRCODE_001_SSALDO` |
+| Aluno | `26100002` | saldo de R$ 50,00, QR Code `QRCODE_002_CSALDO` |
+
+No Terminal Operacional, a validação aceita a matrícula ou o QR Code. Ela só
+libera a entrada dentro do horário de um turno (café da manhã, almoço ou jantar).
 
 Para recomeçar do zero: `bin/rails db:reset` (recria o banco e roda os seeds).
 
 ## Testes e qualidade
 
 ```bash
+bundle exec rspec                              # testes de models e requests (RSpec)
 bin/rails test                                 # testes unitários e de integração (Minitest)
 bundle exec cucumber                           # todos os cenários BDD
 bundle exec cucumber features/cadastro.feature # uma feature específica
@@ -85,6 +91,7 @@ links comuns, e o Hotwire entra como melhoria progressiva.
 | Caminho | Conteúdo |
 |---|---|
 | `app/models/` | Entidades do MER: `User` (aluno, funcionário e administrador), `Universidade`, `Campus`, `Restaurante`, `Catraca`, `Cartao`, `TipoRefeicao`, `Refeicao`, `Transacao`, `InscricaoFastpass` e `HistoricoCatraca` |
+| `app/services/` | Validação de acesso na catraca, regra do FastPass e geração dos PDFs |
 | `app/views/` | Views em HAML, com layouts por área e partials compartilhados em `shared/` |
 | `app/assets/stylesheets/` | CSS próprio com design tokens (variáveis em `:root`) |
 | `app/javascript/controllers/` | Controllers Stimulus |
@@ -97,9 +104,8 @@ links comuns, e o Hotwire entra como melhoria progressiva.
 
 A branch `main` recebe apenas o resultado de cada sprint. O trabalho acontece em
 branches de sprint (`sprint-01`, `sprint-02`, ...) e cada funcionalidade é feita
-em uma branch criada a partir da sprint atual, integrada por pull request. A
-branch `sprint-02` já contém o banco de dados completo, então as novas
-funcionalidades devem partir dela.
+em uma branch criada a partir da sprint atual, integrada por pull request
+depois da aprovação de outro integrante.
 
 ## Deploy
 
