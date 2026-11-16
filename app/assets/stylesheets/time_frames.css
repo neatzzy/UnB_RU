@@ -60,3 +60,12 @@
   background: var(--cor-campo);
   border-color: var(--cor-borda);
 }
+
+/* Painel de resultado do sorteio (estudante/fastpass, US14). */
+.resultados-fastpass {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}

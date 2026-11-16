@@ -8,7 +8,10 @@ module Estudante
       return redirect_to(fastpass_path, alert: "Escolha um horário") unless time_frame
 
       inscricao = current_user.inscricoes_fastpass.new(time_frame: time_frame, data: Date.current)
-      if salvar(inscricao)
+      # Na última hora o resultado já saiu: quem se inscrevesse agora não poderia cancelar.
+      if inscricao.resultado_liberado?
+        redirect_to fastpass_path, alert: "As inscrições para o #{time_frame.tipo_refeicao.nome} de hoje já foram encerradas"
+      elsif salvar(inscricao)
         redirect_to fastpass_path, notice: "Inscrição no sorteio realizada com sucesso"
       else
         redirect_to fastpass_path, alert: inscricao.errors.full_messages.to_sentence
@@ -16,12 +19,13 @@ module Estudante
     end
 
     # Busca só entre as inscrições do aluno logado: a de outro aluno dá 404.
-    # Depois do sorteio o resultado fica valendo. A regra fica aqui, e não no model,
+    # Depois do sorteio, ou na última hora antes do turno, o resultado fica valendo
+    # (InscricaoFastpass#cancelavel?). A regra fica aqui, e não num callback do model,
     # para não travar o descarte em cascata quando o admin muda o horário do turno.
     def destroy
       inscricao = current_user.inscricoes_fastpass.find(params[:id])
 
-      if inscricao.inscrito?
+      if inscricao.cancelavel?
         inscricao.destroy!
         redirect_to fastpass_path, notice: "Inscrição cancelada"
       else

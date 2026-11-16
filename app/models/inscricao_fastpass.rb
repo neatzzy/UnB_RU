@@ -19,6 +19,36 @@ class InscricaoFastpass < ApplicationRecord
   validates :aluno_id, uniqueness: { scope: :refeicao_id }, if: :refeicao_id?
   validate :uma_por_turno_no_dia, if: -> { aluno && time_frame && data }
 
+  # O resultado do sorteio sai 1 hora antes do início do turno (US14).
+  ANTECEDENCIA_DO_RESULTADO = 1.hour
+
+  # Início do turno na data. A coluna hora_inicio guarda só o horário (com a data
+  # 2000-01-01), por isso a hora e o minuto são aplicados sobre a data.
+  def self.inicio_do_turno(turno, data)
+    hora = turno.hora_inicio
+    data.in_time_zone.change(hour: hora.hour, min: hora.min)
+  end
+
+  # Também vale para quem ainda não se inscreveu: a partir desse horário o turno
+  # não aceita novas inscrições (controller e view).
+  def self.resultado_liberado?(turno, data)
+    Time.current >= inicio_do_turno(turno, data) - ANTECEDENCIA_DO_RESULTADO
+  end
+
+  def inicio_do_turno
+    self.class.inicio_do_turno(time_frame.tipo_refeicao, data)
+  end
+
+  def resultado_liberado?
+    self.class.resultado_liberado?(time_frame.tipo_refeicao, data)
+  end
+
+  # O aluno só cancela antes do sorteio e antes de o resultado ser divulgado.
+  # A view e o controller usam a mesma regra.
+  def cancelavel?
+    inscrito? && !resultado_liberado?
+  end
+
   private
 
   # A regra é uma inscrição por turno (Almoço, Jantar) no dia, e não por janela.

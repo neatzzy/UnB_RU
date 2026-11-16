@@ -1,5 +1,6 @@
 module Estudante
-  # Sorteio do FastPass (US13): o aluno escolhe uma janela por turno.
+  # Sorteio do FastPass: o aluno escolhe uma janela por turno (US13) e vê o
+  # resultado a partir de 1 hora antes do turno (US14).
   class FastpassController < BaseController
     before_action :exigir_aluno
 
@@ -10,6 +11,8 @@ module Estudante
                                .includes(time_frame: :tipo_refeicao).to_a
       @inscricoes = inscricoes.index_by { |inscricao| inscricao.time_frame.tipo_refeicao_id }
       avisar_inscricao_duplicada(inscricoes)
+      # Na ordem dos turnos, só as inscrições cujo resultado já foi divulgado.
+      @resultados = @turnos.filter_map { |turno| @inscricoes[turno.id] }.select(&:resultado_liberado?)
     end
 
     private

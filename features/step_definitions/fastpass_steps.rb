@@ -1,7 +1,10 @@
 # As janelas do cenário não são regulares (falta 11:45 - 12:00), por isso são
 # criadas diretamente, sem TipoRefeicao#configurar_time_frames. A coluna "lote"
 # não é conferida por nenhum passo e não existe no modelo.
+# O relógio vai para as 8h de hoje: as inscrições fecham 1 hora antes do turno
+# (11:00), e o cenário não pode depender da hora em que a suíte roda.
 Given("o sistema possui os seguintes time-frames de FastPass ativos para o {string}:") do |turno, table|
+  travel_to(Time.zone.today.in_time_zone.change(hour: 8))
   tipo = TipoRefeicao.find_or_create_by!(nome: turno) { |t| t.hora_inicio = "11:00"; t.hora_fim = "14:00" }
   table.hashes.each do |linha|
     inicio, fim = linha["horario"].split(" - ")
