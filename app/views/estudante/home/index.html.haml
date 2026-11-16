@@ -28,9 +28,6 @@
             Horário: #{@turno_atual.hora_inicio_formatada} às #{@turno_atual.hora_fim_formatada}
 
       = form_with url: home_path, method: :get, local: true, class: "cardapio-controles" do
-        - if Rails.env.local? && params[:data_hora].present?
-          = hidden_field_tag :data_hora, params[:data_hora]
-
         - if @restaurantes.any?
           .cardapio-restaurante-linha
             = label_tag :restaurante_id, "Restaurante Atual:", class: "cardapio-restaurante-label"

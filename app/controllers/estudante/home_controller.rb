@@ -5,7 +5,7 @@ module Estudante
       @restaurante = if params[:restaurante_id].present?
         @restaurantes.find_by(id: params[:restaurante_id])
       end
-      @restaurante ||= @restaurantes.find_by(nome: "RU Darcy Ribeiro") || @restaurantes.first
+      @restaurante ||= @restaurantes.first
 
       @agora = Time.current
       @turno_atual = TipoRefeicao.vigente_em(@agora)
