@@ -1,0 +1,10 @@
+<%
+rerun = File.file?('rerun.txt') ? IO.read('rerun.txt') : ""
+rerun = rerun.strip.gsub /\s/, ' '
+rerun_opts = rerun.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'progress'} features" : "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} #{rerun}"
+excluir_sem_idioma = ""
+std_opts = "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} --strict --publish-quiet --tags 'not @wip' #{excluir_sem_idioma}"
+%>
+default: <%= std_opts %> features
+rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict --publish-quiet --tags 'not @wip'
+fumaca: --format <%= ENV['CUCUMBER_FORMAT'] || 'pretty' %> --strict --publish-quiet features/saude.feature

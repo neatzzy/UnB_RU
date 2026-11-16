@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: unb_ru_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d unb_ru_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      RAILS_ENV: test
+      TEST_DB_HOST: localhost
+      TEST_DB_PORT: 5432
+      TEST_DB_NAME: unb_ru_test
+      TEST_DB_USER: postgres
+      TEST_DB_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: "3.3"
+      - run: bin/rails db:test:prepare
+      - run: bundle exec rspec
+      - run: >-
+          bundle exec cucumber --strict --publish-quiet
+          features/saude.feature
+          features/autenticacao_funcionario.feature
+          features/validacao_entrada.feature
+          features/configuracao_ponto_acesso.feature
+          features/cardapio-atual.feature
+          features/recarga_saldo.feature
+          features/cadastro-usuario.feature
+          features/relatorio_global_acessos.feature
+          features/historico_local_catraca.feature
+          features/gestao_restaurantes.feature
+          features/gestao_catracas.feature
+          features/exportacao_pdf_relatorio_operacao.feature
+          features/extrato_historico.feature
+      - run: bundle exec rubocop --fail-level E
