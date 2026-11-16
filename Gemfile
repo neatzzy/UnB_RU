@@ -56,14 +56,13 @@ group :development, :test do
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
 
-  gem 'cucumber-rails', require: false
+  gem "cucumber-rails", require: false
 
   # Os step definitions em features/ usam `expect(...).to` do RSpec.
-  gem 'rspec-expectations'
+  gem "rspec-expectations"
   gem "rspec-rails", "~> 8.0"
 
-  gem 'database_cleaner'
-
+  gem "database_cleaner"
 end
 
 group :development do
