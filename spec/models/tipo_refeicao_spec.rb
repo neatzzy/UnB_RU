@@ -51,6 +51,55 @@ RSpec.describe TipoRefeicao, type: :model do
     end
   end
 
+  describe "#configurar_time_frames" do
+    before { almoco.update!(hora_fim: "14:00") }
+
+    it "recusa granularidade com casas decimais" do
+      expect(almoco.configurar_time_frames(granularidade: "15.5", tolerancia: "3")).to be(false)
+      expect(almoco.errors[:base]).to include("A granularidade deve ser um número")
+      expect(almoco.time_frames.reload).to be_empty
+    end
+
+    it "recusa tolerância negativa" do
+      expect(almoco.configurar_time_frames(granularidade: "15", tolerancia: "-1")).to be(false)
+      expect(almoco.errors[:base]).to include("A tolerância deve ser um número inteiro maior ou igual a 0")
+    end
+
+    it "mantém as janelas e só muda a tolerância quando a granularidade é a mesma" do
+      almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
+      janelas = almoco.time_frames.reload.ids
+
+      expect(almoco.configurar_time_frames(granularidade: "15", tolerancia: "5")).to be(true)
+      expect(almoco.time_frames.reload.ids).to eq(janelas)
+      expect(almoco.reload.tolerancia_minutos).to eq(5)
+    end
+
+    it "não apaga as inscrições dos alunos quando a granularidade é a mesma" do
+      almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
+      criar_usuario.inscricoes_fastpass.create!(time_frame: almoco.time_frames.first, data: Date.current)
+
+      expect(almoco.configurar_time_frames(granularidade: "15", tolerancia: "5")).to be(true)
+      expect(almoco.inscricoes_fastpass.count).to eq(1)
+    end
+
+    it "recria as janelas quando a granularidade muda" do
+      almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
+
+      expect(almoco.configurar_time_frames(granularidade: "30", tolerancia: "3")).to be(true)
+      expect(almoco.time_frames.reload.size).to eq(6)
+    end
+
+    it "apaga as janelas e a configuração antiga quando o horário muda" do
+      almoco.configurar_time_frames(granularidade: "15", tolerancia: "3")
+      almoco.update!(hora_fim: "13:00")
+      almoco.reload
+
+      expect(almoco.time_frames).to be_empty
+      expect(almoco.granularidade_minutos).to be_nil
+      expect(almoco.tolerancia_minutos).to be_nil
+    end
+  end
+
   describe "#hora_inicio_formatada e #hora_fim_formatada" do
     it "retorna apenas horas e minutos no formato HH:MM" do
       cafe.reload
