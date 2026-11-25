@@ -1,0 +1,106 @@
+pt-BR:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d/%m"
+      long: "%d de %B de %Y"
+    day_names: [domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado]
+    abbr_day_names: [dom, seg, ter, qua, qui, sex, sáb]
+    month_names: [~, janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro]
+    abbr_month_names: [~, jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez]
+    order:
+      - :day
+      - :month
+      - :year
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M:%S"
+      short: "%d/%m/%Y %H:%M"
+      long: "%d de %B de %Y, %H:%M"
+      hora: "%H:%M:%S"
+    am: ""
+    pm: ""
+  number:
+    format:
+      separator: ","
+      delimiter: "."
+      precision: 2
+    currency:
+      format:
+        unit: "R$"
+        format: "%u %n"
+        separator: ","
+        delimiter: "."
+        precision: 2
+  activerecord:
+    models:
+      usuario: Usuário
+      papel: Papel
+      usuario_papel: Papel do usuário
+      estudante: Estudante
+      sessao_autenticacao: Sessão de autenticação
+      unidade_gestora: Unidade gestora
+      restaurante: Restaurante
+      piso: Piso
+      catraca: Catraca
+      tipo_refeicao: Tipo de refeição
+      servico_refeicao: Serviço de refeição
+      cardapio: Cardápio
+      opcao_cardapio: Opção do cardápio
+      item_cardapio: Item do cardápio
+    attributes:
+      unidade_gestora:
+        nome: Nome
+      restaurante:
+        numero: Número
+      piso:
+        numero: Número
+      tipo_refeicao:
+        codigo: Código
+        nome: Nome
+      servico_refeicao:
+        dia_semana: Dia da semana
+        inicio: Início
+        fim: Fim
+      cardapio:
+        data_referencia: Data de referência
+      opcao_cardapio:
+        dieta: Dieta
+      item_cardapio:
+        categoria: Categoria
+        descricao: Descrição
+        ordem: Ordem
+      usuario:
+        nome: Nome
+        identificacao: Identificação
+        email: Email
+        password: Senha
+        ativo: Ativo
+      estudante:
+        matricula: Matrícula
+        vinculo_ativo: Vínculo ativo
+      papel:
+        codigo: Código
+        descricao: Descrição
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "não pode ficar em branco"
+      taken: "já está em uso"
+      invalid: "não é válido"
+      too_short: "é muito curto (mínimo: %{count} caracteres)"
+      too_long: "é muito longo (máximo: %{count} caracteres)"
+      confirmation: "não confere com %{attribute}"
+      required: "é obrigatório(a)"
+      inclusion: "não está incluído na lista"
+      not_a_number: "não é um número"
+      not_an_integer: "não é um número inteiro"
+      greater_than: "deve ser maior que %{count}"
+      restrict_dependent_destroy:
+        has_one: "Não é possível excluir o registro pois existe um(a) %{record} dependente"
+        has_many: "Não é possível excluir o registro pois existem %{record} dependentes"
+  helpers:
+    submit:
+      create: "Criar %{model}"
+      update: "Atualizar %{model}"
+      submit: "Salvar %{model}"
